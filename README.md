@@ -7,15 +7,17 @@ A Go trading bot for [Kalshi](https://kalshi.com) prediction markets.
 ```
 kalshi-go/
 ├── cmd/
-│   └── kalshi-bot/       # CLI entry point
+│   └── kalshi-bot/           # CLI entry point
 ├── pkg/
-│   └── ws/               # WebSocket client package
-│       ├── client.go     # WebSocket client implementation
-│       ├── channels.go   # Channel type definitions
-│       ├── messages.go   # Message types and parsing
-│       └── options.go    # Connection options
+│   └── ws/                   # WebSocket client package
+│       ├── auth.go           # RSA-PSS authentication
+│       ├── client.go         # WebSocket client
+│       ├── channels.go       # Channel definitions
+│       ├── messages.go       # Message types
+│       ├── options.go        # Configuration options
+│       └── README.md         # Package documentation
 ├── internal/
-│   └── config/           # Configuration handling
+│   └── config/               # Configuration handling
 └── go.mod
 ```
 
@@ -25,45 +27,36 @@ kalshi-go/
 go mod download
 ```
 
-## Usage
+## Quick Start
 
-### Environment Variables
+### 1. Set up credentials
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `KALSHI_API_KEY` | For auth | Your Kalshi API key |
-| `KALSHI_PRIVATE_KEY` | For auth | Your Kalshi private key |
-| `KALSHI_WS_URL` | No | Custom WebSocket URL (defaults to production) |
-| `KALSHI_DEBUG` | No | Enable debug logging (`true`/`false`) |
+Create a `.env` file with your Kalshi API credentials:
 
-### Running the Bot
-
-```bash
-# Unauthenticated (public channels only)
-go run ./cmd/kalshi-bot
-
-# Authenticated
-export KALSHI_API_KEY="your-api-key"
-export KALSHI_PRIVATE_KEY="your-private-key"
-go run ./cmd/kalshi-bot
+```
+KALSHI_API_KEY=your-api-key-id
+KALSHI_PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----
+...your private key...
+-----END RSA PRIVATE KEY-----
 ```
 
-## WebSocket Package (`pkg/ws`)
+### 2. Run the bot
 
-The `ws` package provides a clean, idiomatic Go client for the Kalshi WebSocket API.
+```bash
+# Just connect
+go run ./cmd/kalshi-bot
 
-### Channels
+# Subscribe to a market
+go run ./cmd/kalshi-bot -market "KXBTC-25DEC31-T50000" -channel "ticker"
 
-| Channel | Auth Required | Description |
-|---------|--------------|-------------|
-| `orderbook_delta` | No | Orderbook updates |
-| `ticker` | No | Market ticker |
-| `trade` | No | Public trades |
-| `lifecycle` | No | Market & event lifecycle |
-| `fill` | Yes | User fills |
-| `positions` | Yes | Market positions |
+# Available channels: ticker, orderbook_delta, trade, fill, positions
+```
 
-### Example
+## WebSocket Package
+
+See [`pkg/ws/README.md`](pkg/ws/README.md) for full package documentation.
+
+### Quick Example
 
 ```go
 package main
@@ -76,44 +69,52 @@ import (
 )
 
 func main() {
-    // Create client with options
+    // Parse your RSA private key
+    privateKey, _ := ws.ParsePrivateKeyString(pemKey)
+
+    // Create authenticated client
     client := ws.New(
-        ws.WithAPIKeyOption("your-api-key", "your-private-key"),
-        ws.WithCallbacks(
-            func() { log.Println("connected") },
-            func(err error) { log.Printf("disconnected: %v", err) },
-            func(err error) { log.Printf("error: %v", err) },
-        ),
+        ws.WithAPIKeyOption("your-api-key-id", privateKey),
     )
 
     // Connect
     ctx := context.Background()
-    if err := client.Connect(ctx); err != nil {
-        log.Fatal(err)
-    }
+    client.Connect(ctx)
     defer client.Close()
 
-    // Set message handler
-    client.SetMessageHandler(func(msg *ws.Response) {
-        log.Printf("received: %+v", msg)
-    })
+    // Subscribe to ticker updates
+    client.Subscribe(ctx, "MARKET-TICKER", ws.ChannelTicker)
 
-    // Subscribe to orderbook updates
-    _, err := client.Subscribe(ctx, "TICKER-EXAMPLE", ws.ChannelOrderbookDelta)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    // Keep running...
     select {}
 }
 ```
 
+### Channels
+
+| Channel | Auth | Description |
+|---------|------|-------------|
+| `orderbook_delta` | No | Real-time orderbook updates |
+| `ticker` | No | Market ticker data |
+| `trade` | No | Public trade executions |
+| `lifecycle` | No | Market & event lifecycle |
+| `fill` | Yes | Your trade fills |
+| `positions` | Yes | Your market positions |
+
+## Testing
+
+```bash
+# Run unit tests (49 tests)
+go test ./pkg/ws/...
+
+# Run integration tests (requires credentials)
+go test -tags=integration ./pkg/ws/...
+```
+
 ## API Reference
 
-See [Kalshi WebSocket Documentation](https://docs.kalshi.com/websockets/websocket-connection) for full API details.
+- [Kalshi WebSocket Documentation](https://docs.kalshi.com/websockets/websocket-connection)
+- [Package Documentation](pkg/ws/README.md)
 
 ## License
 
 MIT
-
