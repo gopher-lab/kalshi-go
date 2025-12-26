@@ -1,0 +1,22 @@
+services:
+  lahigh-bot:
+    build: .
+    container_name: lahigh-trading-bot
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles
+    # Mount .env file directly into container
+    volumes:
+      - ./.env:/app/.env:ro
+    working_dir: /app
+    # Command with options
+    command: [
+      "-event", "KXHIGHLAX-25DEC27",
+      "-max-risk", "50"
+    ]
+    # Keep logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
