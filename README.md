@@ -6,26 +6,39 @@ A Go trading bot for [Kalshi](https://kalshi.com) prediction markets, with a val
 
 A backtested and validated trading strategy for the KXHIGHLAX (Highest Temperature in LA) market.
 
-### Validated Results (53 Days of Real Data)
+**📚 Full documentation: [docs/LAHIGH-STRATEGY.md](docs/LAHIGH-STRATEGY.md)**
+
+### Validated Results (14 Days of Real Kalshi Trade Data)
 
 | Metric | Value |
 |--------|-------|
-| Days with big edge (<50¢ entry) | 71.7% |
-| Average profit per trade | 65.7¢ |
-| Best strategy Sharpe ratio | 85.0 |
-| Win rate (on winning bracket) | 100% |
+| Average edge at first trade | **71¢** |
+| Days with 50%+ edge | **93%** (13/14 days) |
+| First trade timing | **7-9 AM PT day before** |
+| METAR→CLI accuracy | 96.2% |
 
-### The Strategy
+### Key Insight: Edge is on the DAY BEFORE
 
-The daily high temperature at LAX typically occurs by **10-11 AM PT** (62.5% of the time). By monitoring METAR data early, you can identify the winning bracket before the market prices it in.
+The market for tomorrow's weather opens at ~7 AM PT **today**. First trades on the winning bracket are typically at **5-40¢**, providing massive edge.
 
 ```
-Entry Price    Action          Expected Profit
------------    ------          ---------------
-< 50¢          🟢 STRONG BUY   ~70¢ profit
-50-80¢         🟡 BUY          ~35¢ profit  
-> 80¢          🔴 SKIP         Edge too small
+Timeline for Dec 27's weather:
+┌────────────────────────────────────────────────────────┐
+│ Dec 26, 7 AM:   Market opens, first trade @ 20-40¢    │
+│ Dec 26, PM:     Trades at 40-70¢                      │
+│ Dec 27, AM:     Hits 80-90% as temp confirmed         │
+│ Dec 28, 10 AM:  SETTLEMENT - pays $1.00               │
+└────────────────────────────────────────────────────────┘
 ```
+
+### Entry Recommendations
+
+| Entry Price | When | Expected Profit |
+|-------------|------|-----------------|
+| **< 40¢** | Day before morning | 🟢 **60-95¢** |
+| 40-70¢ | Day before afternoon | 🟡 30-60¢ |
+| 70-90¢ | Target day morning | 🟠 10-30¢ |
+| > 90¢ | Target day afternoon | 🔴 NO EDGE |
 
 ### Quick Start
 
@@ -46,17 +59,22 @@ go run ./cmd/lahigh-trader/ -event KXHIGHLAX-25DEC27
 kalshi-go/
 ├── cmd/
 │   ├── kalshi-bot/              # Generic WebSocket bot
+│   ├── lahigh-autorun/          # Set-and-forget trading bot
 │   ├── lahigh-trader/           # LA High Temperature trader
-│   ├── lahigh-monitor/          # Real-time temperature monitor
+│   ├── lahigh-backtest-real/    # Real Kalshi trade data backtest
 │   ├── lahigh-backtest-validated/ # Backtest with real prices
-│   ├── lahigh-backtest-full/    # Full historical backtest
 │   ├── lahigh-montecarlo/       # Monte Carlo simulation
-│   └── lahigh-predict/          # Temperature prediction
+│   ├── lahigh-predict-v2/       # Temperature prediction (NWS + METAR)
+│   └── lahigh-status/           # Check bot readiness
 ├── pkg/
 │   ├── ws/                      # WebSocket client
 │   └── rest/                    # REST API client
 ├── internal/
 │   └── config/                  # Configuration handling
+├── docs/
+│   └── LAHIGH-STRATEGY.md       # Full strategy documentation
+├── Dockerfile                   # Docker build
+├── docker-compose.yml           # Docker compose config
 └── go.mod
 ```
 
@@ -157,10 +175,11 @@ go test -tags=integration ./pkg/ws/...
 
 ## Key Findings
 
-1. **Daily max timing**: 62.5% of daily highs occur between 10-11 AM PT
-2. **METAR→CLI calibration**: +1°F adjustment from METAR to NWS CLI
-3. **Edge frequency**: 72% of days have significant edge (<50¢ entry)
-4. **No-edge days**: Only 4% of days have no trading opportunity
+1. **Edge timing**: The biggest edge is on the **DAY BEFORE**, not the day of
+2. **First trade prices**: Winning brackets start at 5-40¢ when market opens
+3. **Daily max timing**: 76.5% of daily highs occur between 10 AM - 12 PM PT
+4. **METAR→CLI calibration**: +1°F adjustment from METAR to NWS CLI (96.2% accuracy)
+5. **Edge frequency**: 93% of days have 50%+ edge at first trade
 
 ## License
 
