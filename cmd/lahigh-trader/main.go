@@ -25,11 +25,11 @@ import (
 
 // Configuration
 var (
-	maxPositionSize = 10    // Max contracts per position
-	maxRiskCents    = 5000  // Max $50 at risk per trade
-	minEdge         = 0.05  // Minimum 5% edge to trade
-	cliCalibration  = 1.0   // METAR to CLI adjustment
-	pollInterval    = 5 * time.Minute
+	maxPositionSize = 10   // Max contracts per position
+	maxRiskCents    = 5000 // Max $50 at risk per trade
+	minEdge         = 0.05 // Minimum 5% edge to trade
+	cliCalibration  = 1.0  // METAR to CLI adjustment
+	pollInterval    = 30 * time.Second // Fast polling for price changes
 )
 
 // Trading state
@@ -99,7 +99,10 @@ func main() {
 	autoTrade := flag.Bool("auto", false, "Enable auto-trading (default: manual confirmation)")
 	maxRisk := flag.Int("max-risk", 50, "Maximum risk per trade in dollars")
 	maxContracts := flag.Int("max-contracts", 10, "Maximum contracts per position")
+	pollSecs := flag.Int("poll", 30, "Polling interval in seconds (default: 30)")
 	flag.Parse()
+
+	pollInterval = time.Duration(*pollSecs) * time.Second
 
 	maxRiskCents = *maxRisk * 100
 	maxPositionSize = *maxContracts
@@ -141,6 +144,7 @@ func main() {
 	fmt.Printf("💵 Max Risk: $%d per trade\n", *maxRisk)
 	fmt.Printf("📊 Max Contracts: %d per position\n", *maxContracts)
 	fmt.Printf("📈 Min Edge: %.0f%%\n", minEdge*100)
+	fmt.Printf("⏱️  Poll Interval: %v\n", pollInterval)
 	fmt.Println()
 
 	client := rest.New(cfg.APIKey, cfg.PrivateKey, restOpts...)
