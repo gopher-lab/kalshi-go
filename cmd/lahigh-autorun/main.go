@@ -22,12 +22,14 @@ import (
 
 // Configuration
 var (
-	maxPositionSize = 10   // Max contracts per position
-	maxRiskCents    = 5000 // Max $50 at risk
-	minEdge         = 0.05 // 5% minimum edge
-	maxEntryPrice   = 80   // Don't buy above 80¢
-	cliCalibration  = 1.0  // METAR to CLI adjustment
-	pollInterval    = 30 * time.Second
+	maxPositionSize  = 10   // Max contracts per position
+	maxRiskCents     = 5000 // Max $50 at risk
+	minEdge          = 0.05 // 5% minimum edge
+	maxEntryPrice    = 80   // Don't buy above 80¢
+	cliCalibration   = 1.0  // METAR to CLI adjustment
+	pollInterval     = 30 * time.Second
+	tradingStartHour = 7    // 7 AM PT - start trading
+	tradingEndHour   = 12   // 12 PM PT - stop adding positions
 )
 
 type MarketState struct {
@@ -151,6 +153,33 @@ func checkAndTrade(client *rest.Client, eventTicker string, targetDate time.Time
 	// Determine if we're trading for today or a future day
 	isTargetToday := now.Format("2006-01-02") == targetDate.Format("2006-01-02")
 
+	// Determine trading window status
+	var tradingStatus string
+	var canTrade bool
+
+	if !isTargetToday {
+		// Target is in the future - monitor only
+		targetStart := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 
+			tradingStartHour, 0, 0, 0, la)
+		until := targetStart.Sub(now).Round(time.Minute)
+		tradingStatus = fmt.Sprintf("⏳ WAITING - Trading starts in %v", until)
+		canTrade = false
+	} else if now.Hour() < tradingStartHour {
+		// Before trading window
+		minsUntil := (tradingStartHour-now.Hour())*60 - now.Minute()
+		tradingStatus = fmt.Sprintf("⏳ WAITING - Trading starts in %d minutes", minsUntil)
+		canTrade = false
+	} else if now.Hour() >= tradingEndHour {
+		// After trading window
+		tradingStatus = "🔒 HOLDING - Trading window closed (after 12 PM)"
+		canTrade = false
+	} else {
+		// In trading window!
+		minsLeft := (tradingEndHour-now.Hour())*60 - now.Minute()
+		tradingStatus = fmt.Sprintf("🟢 TRADING WINDOW ACTIVE (%d min remaining)", minsLeft)
+		canTrade = true
+	}
+
 	// Get expected temperature
 	var expectedCLI int
 	var source string
@@ -217,10 +246,34 @@ func checkAndTrade(client *rest.Client, eventTicker string, targetDate time.Time
 	})
 
 	// Print status
-	fmt.Printf("[%s] Expected CLI: %d°F (%s) | StdDev: %.1f\n",
-		now.Format("15:04:05"), expectedCLI, source, stdDev)
+	fmt.Printf("[%s] %s\n", now.Format("15:04:05"), tradingStatus)
+	fmt.Printf("         Expected CLI: %d°F (%s) | StdDev: %.1f\n", expectedCLI, source, stdDev)
 
-	// Find best opportunity
+	// Show best opportunity
+	var bestOpp *MarketState
+	for i := range states {
+		s := &states[i]
+		if !tradedBrackets[s.Ticker] && s.Edge >= minEdge && s.YesAsk <= maxEntryPrice && s.YesAsk > 0 {
+			bestOpp = s
+			break
+		}
+	}
+
+	if bestOpp != nil {
+		fmt.Printf("         Best opportunity: %s @ %d¢ (Edge: +%.0f%%)\n", 
+			bestOpp.Strike, bestOpp.YesAsk, bestOpp.Edge*100)
+	}
+
+	// Only execute trades during trading window
+	if !canTrade {
+		if bestOpp != nil {
+			fmt.Printf("         → Will trade when window opens\n")
+		}
+		fmt.Println()
+		return
+	}
+
+	// Find best opportunity and trade
 	for _, s := range states {
 		if tradedBrackets[s.Ticker] {
 			continue // Already traded this bracket
