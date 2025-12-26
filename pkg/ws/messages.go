@@ -145,4 +145,3 @@ func ParseErrorMsg(msg any) (*ErrorMsg, error) {
 	}
 	return &result, nil
 }
-

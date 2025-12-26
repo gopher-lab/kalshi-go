@@ -2,9 +2,6 @@ package ws
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -42,12 +39,12 @@ type DataHandler func(sid int64, data json.RawMessage)
 
 // Client is a WebSocket client for the Kalshi API.
 type Client struct {
-	opts    Options
-	conn    *websocket.Conn
-	mu      sync.RWMutex
-	done    chan struct{}
-	msgID   atomic.Int64
-	handler MessageHandler
+	opts        Options
+	conn        *websocket.Conn
+	mu          sync.RWMutex
+	done        chan struct{}
+	msgID       atomic.Int64
+	handler     MessageHandler
 	dataHandler DataHandler
 
 	// subscriptions tracks active subscriptions by SID.
@@ -91,7 +88,10 @@ func (c *Client) Connect(ctx context.Context) error {
 	// Add authentication headers if credentials are provided.
 	if c.opts.IsAuthenticated() {
 		ts := strconv.FormatInt(time.Now().UnixMilli(), 10)
-		sig := c.signRequest(ts)
+		sig, err := GenerateSignature(c.opts.PrivateKey, ts, "GET", "/trade-api/ws/v2")
+		if err != nil {
+			return fmt.Errorf("generate signature: %w", err)
+		}
 		header.Set("KALSHI-ACCESS-KEY", c.opts.APIKey)
 		header.Set("KALSHI-ACCESS-SIGNATURE", sig)
 		header.Set("KALSHI-ACCESS-TIMESTAMP", ts)
@@ -370,14 +370,6 @@ func (c *Client) pingLoop() {
 	}
 }
 
-// signRequest generates the authentication signature for the WebSocket handshake.
-func (c *Client) signRequest(timestamp string) string {
-	msg := timestamp + "GET" + "/trade-api/ws/v2"
-	h := hmac.New(sha256.New, []byte(c.opts.PrivateKey))
-	h.Write([]byte(msg))
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
-}
-
 // GetActiveSubscriptions returns a map of active subscription SIDs to channels.
 func (c *Client) GetActiveSubscriptions() map[int64]Channel {
 	result := make(map[int64]Channel)
@@ -391,4 +383,3 @@ func (c *Client) GetActiveSubscriptions() map[int64]Channel {
 	})
 	return result
 }
-

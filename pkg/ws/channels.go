@@ -42,4 +42,3 @@ func (c Channel) IsValid() bool {
 		return false
 	}
 }
-

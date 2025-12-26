@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"crypto/rsa"
 	"net/http"
 	"time"
 )
@@ -27,13 +28,13 @@ type Options struct {
 	// BaseURL is the WebSocket server URL.
 	BaseURL string
 
-	// APIKey is the API key for authenticated connections.
+	// APIKey is the API key ID for authenticated connections.
 	// Leave empty for unauthenticated connections.
 	APIKey string
 
-	// PrivateKey is the private key for signing authentication.
+	// PrivateKey is the parsed RSA private key for signing requests.
 	// Required for authenticated connections along with APIKey.
-	PrivateKey string
+	PrivateKey *rsa.PrivateKey
 
 	// Headers are additional HTTP headers to include in the handshake.
 	Headers http.Header
@@ -76,8 +77,8 @@ func DefaultOptions() Options {
 	}
 }
 
-// WithAPIKey returns a copy of Options with the API key set.
-func (o Options) WithAPIKey(apiKey, privateKey string) Options {
+// WithAPIKey returns a copy of Options with the API key and private key set.
+func (o Options) WithAPIKey(apiKey string, privateKey *rsa.PrivateKey) Options {
 	o.APIKey = apiKey
 	o.PrivateKey = privateKey
 	return o
@@ -98,14 +99,14 @@ func (o Options) WithAutoReconnect(enabled bool, maxAttempts int) Options {
 
 // IsAuthenticated returns true if API credentials are configured.
 func (o Options) IsAuthenticated() bool {
-	return o.APIKey != "" && o.PrivateKey != ""
+	return o.APIKey != "" && o.PrivateKey != nil
 }
 
 // Option is a functional option for configuring the client.
 type Option func(*Options)
 
-// WithAPIKeyOption returns an Option that sets the API credentials.
-func WithAPIKeyOption(apiKey, privateKey string) Option {
+// WithAPIKeyOption returns an Option that sets the API key and private key.
+func WithAPIKeyOption(apiKey string, privateKey *rsa.PrivateKey) Option {
 	return func(o *Options) {
 		o.APIKey = apiKey
 		o.PrivateKey = privateKey
@@ -142,4 +143,3 @@ func WithCallbacks(onConnect func(), onDisconnect func(error), onError func(erro
 		o.OnError = onError
 	}
 }
-
