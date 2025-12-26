@@ -1,56 +1,80 @@
 # kalshi-go
 
-A Go trading bot for [Kalshi](https://kalshi.com) prediction markets, with a validated strategy for the **LA High Temperature** market.
+A Go trading bot for [Kalshi](https://kalshi.com) prediction markets, with analysis and tools for the **LA High Temperature** market.
 
 ## 🎯 LA High Temperature Strategy
 
-A backtested and validated trading strategy for the KXHIGHLAX (Highest Temperature in LA) market.
+Tools and backtesting for the KXHIGHLAX (Highest Temperature in LA) market.
 
 **📚 Full documentation: [docs/LAHIGH-STRATEGY.md](docs/LAHIGH-STRATEGY.md)**
 
-### Validated Results (14 Days of Real Kalshi Trade Data)
+### ⚠️ Key Finding: Model Accuracy is Limited
+
+Our rigorous backtest revealed honest results:
 
 | Metric | Value |
 |--------|-------|
-| Average edge at first trade | **71¢** |
-| Days with 50%+ edge | **93%** (13/14 days) |
-| First trade timing | **7-9 AM PT day before** |
-| METAR→CLI accuracy | 96.2% |
+| Model prediction accuracy | **50%** (7/14 days) |
+| First trade prices | **5-40¢** (cheap!) |
+| Potential edge (if correct) | **60-95¢** |
+| +1°F calibration reliability | **~50%** (varies ±1-2°F) |
 
-### Key Insight: Edge is on the DAY BEFORE
-
-The market for tomorrow's weather opens at ~7 AM PT **today**. First trades on the winning bracket are typically at **5-40¢**, providing massive edge.
+### The Edge IS Real, Prediction is Hard
 
 ```
-Timeline for Dec 27's weather:
-┌────────────────────────────────────────────────────────┐
-│ Dec 26, 7 AM:   Market opens, first trade @ 20-40¢    │
-│ Dec 26, PM:     Trades at 40-70¢                      │
-│ Dec 27, AM:     Hits 80-90% as temp confirmed         │
-│ Dec 28, 10 AM:  SETTLEMENT - pays $1.00               │
-└────────────────────────────────────────────────────────┘
+✅ WHAT WORKS:
+   - Winning brackets start at 5-40¢
+   - First trades happen 7-9 AM PT day before
+   - There IS 60-95¢ of potential profit per contract
+
+❌ WHAT'S HARD:
+   - +1°F calibration only works ~50% of time
+   - Some days CLI = METAR +2°F, some days -1°F
+   - Simple models can't reliably pick the winner
 ```
 
-### Entry Recommendations
+### Real Backtest Results (14 Days)
 
-| Entry Price | When | Expected Profit |
-|-------------|------|-----------------|
-| **< 40¢** | Day before morning | 🟢 **60-95¢** |
-| 40-70¢ | Day before afternoon | 🟡 30-60¢ |
-| 70-90¢ | Target day morning | 🟠 10-30¢ |
-| > 90¢ | Target day afternoon | 🔴 NO EDGE |
+| Date | METAR | Predicted | Winner | Correct | Profit |
+|------|-------|-----------|--------|---------|--------|
+| Dec 25 | 66°F | 66-67° | 66-67° | ✅ | -$0.84 |
+| Dec 24 | 64°F | 64-65° | 64-65° | ✅ | -$1.50 |
+| Dec 23 | 63°F | 64-65° | 64-65° | ✅ | +$26.60 |
+| Dec 22 | 64°F | 64-65° | 64-65° | ✅ | +$0.06 |
+| Dec 21 | 64°F | 64-65° | 64-65° | ✅ | +$3.41 |
+| Dec 20 | 65°F | 65-66° | 65-66° | ✅ | +$1.49 |
+| Dec 19 | 69°F | 69-70° | 71-72° | ❌ | -$9.69 |
+| ... | | | | | |
+| **Total** | | | | **50%** | **$0.77** |
+
+### Recommended Approach
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│  FOR LEARNING / THESIS TESTING                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                                                │
+│  1. Use small position sizes ($5-15)                          │
+│  2. Hedge across 2-3 brackets                                 │
+│  3. Track predictions vs outcomes                             │
+│  4. Iterate and improve model                                 │
+│                                                                │
+│  This is DATA COLLECTION, not guaranteed profit.              │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+```
 
 ### Quick Start
 
 ```bash
-# Run the validated backtest
-go run ./cmd/lahigh-backtest-validated/
+# Run the rigorous backtest (honest results)
+go run ./cmd/lahigh-backtest-rigorous/
+
+# Run the trade data backtest (price evolution)
+go run ./cmd/lahigh-backtest-real/
 
 # Monitor today's temperature
 go run ./cmd/lahigh-monitor/
-
-# Run the trading bot
-go run ./cmd/lahigh-trader/ -event KXHIGHLAX-25DEC27
 ```
 
 ## Project Structure
@@ -61,6 +85,7 @@ kalshi-go/
 │   ├── kalshi-bot/              # Generic WebSocket bot
 │   ├── lahigh-autorun/          # Set-and-forget trading bot
 │   ├── lahigh-trader/           # LA High Temperature trader
+│   ├── lahigh-backtest-rigorous/# Rigorous prediction backtest (NEW)
 │   ├── lahigh-backtest-real/    # Real Kalshi trade data backtest
 │   ├── lahigh-backtest-validated/ # Backtest with real prices
 │   ├── lahigh-montecarlo/       # Monte Carlo simulation
@@ -100,20 +125,20 @@ KALSHI_PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----
 ### LA High Temperature Trading
 
 ```bash
-# Run validated backtest (uses real Kalshi prices)
-go run ./cmd/lahigh-backtest-validated/
+# Run rigorous backtest (simulates predictions, honest results)
+go run ./cmd/lahigh-backtest-rigorous/
+
+# Run real trade data backtest (shows price evolution)
+go run ./cmd/lahigh-backtest-real/
 
 # Monitor real-time temperature at LAX
 go run ./cmd/lahigh-monitor/
 
-# Run the trading bot (manual confirmation mode)
+# Run the trading bot
 go run ./cmd/lahigh-trader/ -event KXHIGHLAX-25DEC27
 
-# Run with auto-trading (be careful!)
-go run ./cmd/lahigh-trader/ -event KXHIGHLAX-25DEC27 -auto
-
-# Use demo environment (no real money)
-go run ./cmd/lahigh-trader/ -event KXHIGHLAX-25DEC27 -demo
+# Run with Docker
+docker-compose up --build -d
 ```
 
 ### Generic Kalshi Bot
@@ -173,13 +198,24 @@ go test ./pkg/ws/...
 go test -tags=integration ./pkg/ws/...
 ```
 
-## Key Findings
+## Key Learnings
 
 1. **Edge timing**: The biggest edge is on the **DAY BEFORE**, not the day of
 2. **First trade prices**: Winning brackets start at 5-40¢ when market opens
-3. **Daily max timing**: 76.5% of daily highs occur between 10 AM - 12 PM PT
-4. **METAR→CLI calibration**: +1°F adjustment from METAR to NWS CLI (96.2% accuracy)
-5. **Edge frequency**: 93% of days have 50%+ edge at first trade
+3. **Prediction is hard**: +1°F calibration only works ~50% of the time
+4. **Model limitations**: Simple METAR+calibration can't reliably beat the market
+5. **Future work**: Need better prediction models, probabilistic approaches
+
+## Honest Assessment
+
+This project demonstrates:
+- ✅ The infrastructure to trade Kalshi markets
+- ✅ Real-time data fetching and parsing
+- ✅ Comprehensive backtesting framework
+- ⚠️ Model accuracy is limited (~50%)
+- ⚠️ NOT a "money printer" without better prediction
+
+The **tooling** is solid. The **prediction model** needs work.
 
 ## License
 

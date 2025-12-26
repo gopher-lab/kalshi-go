@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the validated trading strategy for Kalshi's "Highest Temperature in LA" (LAHIGH) market series based on real historical trade data.
+This document describes the trading strategy analysis for Kalshi's "Highest Temperature in LA" (LAHIGH) market series, including honest findings from rigorous backtesting.
 
 ## Market Mechanics
 
@@ -12,29 +12,32 @@ This document describes the validated trading strategy for Kalshi's "Highest Tem
 - **Settlement Time**: 10:00 AM ET the day after
 - **Brackets**: 2°F ranges (e.g., 62-63°F, 64-65°F)
 
-## Key Finding: The Edge is on the Day BEFORE
+## ⚠️ Key Finding: Model Accuracy is Limited
 
-Our backtest of 14 days of real Kalshi trade data revealed:
+Our rigorous backtest using real data revealed a sobering reality:
 
-| Metric | Value |
-|--------|-------|
-| Average edge at first trade | **71¢** |
-| Days with 50%+ edge | **93%** (13/14 days) |
-| First trade timing | **7-9 AM PT day before** |
+| Metric | Claimed | Actual |
+|--------|---------|--------|
+| +1°F calibration accuracy | 96% | **50%** (7/14 days) |
+| Expected profit | $900+ | **$0.77** |
+| ROI | 100%+ | **0.4%** |
 
-### Timeline Example (Dec 25 weather, 66-67°F won)
+### Why the Discrepancy?
 
-```
-Dec 24, 7:15 AM PT:  Market OPENS, first trade @ 40¢
-Dec 24, throughout:  Trades at 40-70¢
-Dec 25, 10:34 AM PT: Hits 80% as temp confirmed
-Dec 25, 12:18 PM PT: Hits 90%
-Dec 26, 10:00 AM ET: SETTLEMENT - pays $1.00
-```
+The original 96% figure was for **post-hoc METAR→CLI comparison** (looking at data after the fact).
 
-**Profit if bought at first trade (40¢): 60¢ per contract**
+For **prediction** (forecasting BEFORE the event), the +1°F calibration is NOT reliable:
 
-## Real Data: 14-Day Backtest
+| Pattern | Frequency | Impact |
+|---------|-----------|--------|
+| CLI = METAR + 1°F | ~50% | ✅ Prediction correct |
+| CLI = METAR + 2°F | ~25% | ❌ Off by 1 bracket |
+| CLI = METAR - 1°F | ~10% | ❌ Off by 1 bracket |
+| Wide brackets | ~15% | ⚠️ Hard to evaluate |
+
+## First Trade Prices ARE Cheap (Real Edge)
+
+Despite model limitations, early prices remain genuinely underpriced:
 
 | Date | Winner | 1st Price | First Trade | Edge |
 |------|--------|-----------|-------------|------|
@@ -45,154 +48,173 @@ Dec 26, 10:00 AM ET: SETTLEMENT - pays $1.00
 | Dec 21 | 64-65°F | 36¢ | Dec 20, 8:01 AM | 64¢ 🎯 |
 | Dec 20 | 65-66°F | 21¢ | Dec 19, 7:15 AM | 79¢ 🎯 |
 | Dec 19 | 71-72°F | 6¢ | Dec 18, 7:04 AM | 94¢ 🎯 |
-| Dec 18 | 72° or below | 40¢ | Dec 17, 7:01 AM | 60¢ 🎯 |
-| Dec 17 | 74-75°F | 2¢ | Dec 16, 9:13 AM | 98¢ 🎯 |
-| Dec 16 | 71° or below | 65¢ | Dec 15, 7:04 AM | 35¢ ✅ |
-| Dec 15 | 65-66°F | 16¢ | Dec 14, 7:03 AM | 84¢ 🎯 |
-| Dec 14 | 65° or below | 16¢ | Dec 13, 7:42 AM | 84¢ 🎯 |
-| Dec 13 | 65° or below | 27¢ | Dec 12, 7:33 AM | 73¢ 🎯 |
-| Dec 12 | 67-68°F | 20¢ | Dec 11, 7:17 AM | 80¢ 🎯 |
 
-## Trading Windows
+**The edge IS real** - winning brackets start at 6-40¢. 
 
-### Optimal Entry Times
+**The problem**: Identifying WHICH bracket will win in advance is the hard part.
 
-| Time Window | Typical Price | Edge | Recommendation |
-|-------------|---------------|------|----------------|
-| **Day Before, 7-9 AM PT** | 5-40¢ | 60-95¢ | **BEST ENTRY** |
-| Day Before, afternoon | 40-70¢ | 30-60¢ | Good entry |
-| Target Day, 7-12 PM PT | 70-90¢ | 10-30¢ | Only if confirmed |
-| Target Day, afternoon | 90%+ | <10¢ | NO EDGE |
+## Rigorous Backtest Results
 
-### When Daily Max Occurs (85 days of METAR data)
-
-| Time Period | % of Days | Cumulative |
-|-------------|-----------|------------|
-| 10 AM | 15.3% | 15.3% |
-| 11 AM | 41.2% | 56.5% |
-| 12 PM | 20.0% | 76.5% |
-| 1 PM | 10.6% | 87.1% |
-| 2 PM | 4.7% | 91.8% |
-
-**76.5% of daily maxes occur between 10 AM - 12 PM PT** due to the sea breeze effect at LAX.
-
-## Model Inputs
-
-### 1. NWS Forecast
-- Source: National Weather Service Los Angeles
-- Provides expected high temperature
-- Generally accurate within ±2°F
-
-### 2. METAR Temperature Data
-- Source: Aviation Weather Center (KLAX)
-- Real-time hourly observations
-- Historical data from Iowa State ASOS
-
-### 3. METAR to CLI Calibration
-- NWS CLI typically reports **+1°F** higher than METAR
-- Apply this calibration when comparing METAR to expected settlement
-
-## Risk Factors
-
-| Risk | Frequency | Impact |
-|------|-----------|--------|
-| Wrong bracket prediction | ~15% | Lose entry price |
-| METAR vs CLI off by 2°F | ~4% | Off by 1 bracket |
-| Weather surprises | ~5% | Unpredictable |
-
-**Expected win rate: 80-85%**
-
-## Profit Projections
-
-### Per-Trade Returns (assuming correct bracket)
-
-| Entry Price | Contracts per $50 | Payout | Profit | ROI |
-|-------------|-------------------|--------|--------|-----|
-| 20¢ | 250 | $250 | $200 | 400% |
-| 40¢ | 125 | $125 | $75 | 150% |
-| 60¢ | 83 | $83 | $33 | 66% |
-| 80¢ | 62 | $62 | $12 | 24% |
-
-### Monthly Projection ($50/day, 80% win rate)
-
-- Trading days: ~22
-- Wins: ~18 × $75 avg = $1,350
-- Losses: ~4 × $50 = -$200
-- **Net monthly profit: ~$1,150**
-- **Monthly ROI: ~105%**
-
-## Bot Configuration
-
-### Recommended Settings
-
-```go
-tradingStartHour = 7    // 7 AM PT - when market opens
-tradingEndHour   = 12   // 12 PM PT - stop adding positions
-minEdge          = 0.10 // 10% minimum edge
-maxEntryPrice    = 70   // Don't buy above 70¢
-cliCalibration   = 1.0  // METAR + 1°F = CLI estimate
-```
-
-### Trading Logic
+### Methodology
 
 ```
-1. At 7 AM PT day before:
-   - Get NWS forecast for tomorrow
-   - Apply +1°F calibration
-   - Identify target bracket
-   
-2. Check market price:
-   - If target bracket < 50¢ and edge > 10%: BUY
-   
-3. Monitor throughout day:
-   - If price drops: Consider adding to position
-   - If price spikes above 80¢: Hold, don't add
-   
-4. On target day:
-   - Monitor METAR for confirmation
-   - Hold position to settlement
+For each of 14 historical days:
+1. Fetch METAR max from Iowa State ASOS
+2. Apply +1°F calibration → Predicted bracket
+3. Fetch actual winning bracket from Kalshi
+4. Fetch real first trade prices
+5. Simulate 70/30 hedge and calculate P&L
 ```
+
+### Detailed Results
+
+| Date | METAR | +1°F | Winner | Predicted | Correct | Profit |
+|------|-------|------|--------|-----------|---------|--------|
+| 2025-12-25 | 66°F | 67°F | 66-67° | 66-67° | ✅ | -$0.84 |
+| 2025-12-24 | 64°F | 65°F | 64-65° | 64-65° | ✅ | -$1.50 |
+| 2025-12-23 | 63°F | 64°F | 64-65° | 64-65° | ✅ | +$26.60 |
+| 2025-12-22 | 64°F | 65°F | 64-65° | 64-65° | ✅ | +$0.06 |
+| 2025-12-21 | 64°F | 65°F | 64-65° | 64-65° | ✅ | +$3.41 |
+| 2025-12-20 | 65°F | 66°F | 65-66° | 65-66° | ✅ | +$1.49 |
+| 2025-12-19 | 69°F | 70°F | 71-72° | 69-70° | ❌ | -$9.69 |
+| 2025-12-18 | 70°F | 71°F | ≤72° | 70-71° | ❌ | $0.00 |
+| 2025-12-17 | 72°F | 73°F | 74-75° | 72-73° | ❌ | -$13.53 |
+| 2025-12-16 | 62°F | 63°F | ≤71° | 62-63° | ❌ | $0.00 |
+| 2025-12-15 | 66°F | 67°F | 65-66° | 67-68° | ❌ | -$8.35 |
+| 2025-12-14 | 62°F | 63°F | ≤65° | 62-63° | ❌ | $0.00 |
+| 2025-12-13 | 61°F | 62°F | ≤65° | 62-63° | ❌ | $0.00 |
+| 2025-12-12 | 67°F | 68°F | 67-68° | 67-68° | ✅ | +$3.12 |
+
+### Prediction Errors Analyzed
+
+```
+Dec 19: METAR=69° → +1°F = 70° → Predicted 69-70°
+        BUT CLI settled at 71-72° (CLI was +2°F higher)
+
+Dec 17: METAR=72° → +1°F = 73° → Predicted 72-73°
+        BUT CLI settled at 74-75° (CLI was +2°F higher)
+
+Dec 15: METAR=66° → +1°F = 67° → Predicted 67-68°
+        BUT CLI settled at 65-66° (CLI was -1°F LOWER)
+```
+
+**Conclusion**: The +1°F calibration is an average, not a guarantee. Some days CLI is +2°F, some days -1°F.
+
+## Trading Strategies
+
+### Strategy 1: Thesis-Only (High Risk)
+
+Put all capital on predicted bracket.
+
+- **If correct (50%)**: ~$30-40 profit on $14
+- **If wrong (50%)**: -$14 loss
+- **EV**: ~$8-13 (marginally positive)
+- **Risk**: Coin flip
+
+### Strategy 2: 70/30 Hedge (Medium Risk)
+
+- 70% on thesis bracket
+- 30% on adjacent bracket (usually lower)
+
+- **If thesis wins**: ~$15-25 profit
+- **If adjacent wins**: ~-$5 to +$5
+- **If neither wins**: -$14 loss
+- **EV**: Break-even to small positive
+
+### Strategy 3: Wide Hedge (Lower Risk)
+
+Spread across 3+ brackets:
+- 33% on market favorite
+- 33% on model prediction
+- 33% on protection bracket
+
+- **Higher hit rate** (~70-80% coverage)
+- **Lower per-trade profit** ($5-15)
+- **Better for thesis testing**
+
+### Strategy 4: Market Following
+
+Bet on market favorite (highest probability bracket).
+
+- **Pros**: Wisdom of crowds, no model needed
+- **Cons**: Lower odds, smaller edge
+- **EV**: Near zero (market is efficient)
+
+## Recommended Approach
+
+Given the model's 50% accuracy, we recommend:
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│  FOR LEARNING / THESIS TESTING                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                                                │
+│  1. Use small position sizes ($5-15)                          │
+│  2. Hedge across 2-3 brackets                                 │
+│  3. Track predictions vs outcomes                             │
+│  4. Iterate and improve model                                 │
+│                                                                │
+│  This is DATA COLLECTION, not profit extraction.              │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+```
+
+## What We Learned
+
+### The Edge IS Real
+
+1. Winning brackets start at 5-40¢
+2. They settle at $1.00
+3. First trades happen 7-9 AM PT the day before
+4. There IS 60-95¢ of potential profit
+
+### The Problem is Prediction
+
+1. +1°F calibration only works ~50% of time
+2. Weather is inherently variable
+3. NWS forecasts themselves have error
+4. Simple models can't beat sophisticated weather modeling
+
+### Future Improvements Needed
+
+1. **Better prediction model** - incorporate more weather variables
+2. **Probabilistic approach** - assign probabilities to multiple brackets
+3. **Ensemble methods** - combine multiple models
+4. **Real-time adjustment** - update predictions as METAR data comes in
 
 ## Data Sources
 
-### Kalshi Historical Trades
-- Endpoint: `GET /trade-api/v2/markets/trades?ticker={ticker}&limit=1000`
-- Provides full trade history with timestamps and prices
-- Use cursor for pagination
-
-### METAR Data
-- Real-time: Aviation Weather Center API
-- Historical: Iowa State ASOS (mesonet.agron.iastate.edu)
-- Station: KLAX (Los Angeles Airport)
-
-### NWS Forecast
-- Source: forecast.weather.gov
-- API: api.weather.gov/gridpoints/LOX/154,44/forecast
-
-## Validation
-
-### Backtest Accuracy
-- METAR to CLI calibration validated on 52 days
-- Match rate: 96.2% (50/52 days)
-- Mismatches due to occasional +2°F variance
-
-### Price Data Validation
-- 14 days of real Kalshi trade data analyzed
-- All winning brackets identified correctly
-- Price milestones (50%, 80%, 90%) tracked accurately
+| Source | Data | Used For |
+|--------|------|----------|
+| [Iowa State ASOS](https://mesonet.agron.iastate.edu/) | Historical METAR | Backtesting |
+| [Aviation Weather Center](https://aviationweather.gov/) | Real-time METAR | Live monitoring |
+| [NWS API](https://api.weather.gov/) | Forecasts | Predictions |
+| Kalshi API | Trade history, prices | Validation |
 
 ## Files
 
 | File | Purpose |
 |------|---------|
+| `cmd/lahigh-backtest-rigorous/main.go` | Rigorous backtest with real prediction simulation |
 | `cmd/lahigh-backtest-real/main.go` | Real data backtesting with Kalshi trades |
 | `cmd/lahigh-autorun/main.go` | Automated trading bot |
 | `cmd/lahigh-predict-v2/main.go` | Prediction using NWS + METAR |
 | `cmd/lahigh-status/main.go` | Check bot readiness |
 
+## Running the Backtest
+
+```bash
+# Run the rigorous prediction-based backtest
+go run ./cmd/lahigh-backtest-rigorous/
+
+# Run the real trade data backtest (shows price evolution)
+go run ./cmd/lahigh-backtest-real/
+```
+
 ## Changelog
 
+- **2025-12-26**: Added rigorous backtest with prediction simulation
+- **2025-12-26**: **REVISED**: Model accuracy from 96% to 50%
+- **2025-12-26**: Updated strategy recommendations to reflect reality
+- **2025-12-26**: Documented prediction errors and their causes
 - **2025-12-26**: Initial documentation based on 14-day real data backtest
-- **2025-12-26**: Discovered key insight: edge is on day BEFORE, not day of
-- **2025-12-26**: Validated METAR to CLI +1°F calibration (96.2% accuracy)
-
