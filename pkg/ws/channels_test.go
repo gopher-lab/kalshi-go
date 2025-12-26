@@ -105,4 +105,3 @@ func TestAllAuthChannels(t *testing.T) {
 		}
 	}
 }
-

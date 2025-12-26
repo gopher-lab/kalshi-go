@@ -204,4 +204,3 @@ func TestNewWithOptions(t *testing.T) {
 		t.Errorf("APIKey = %s, want test-key", client.opts.APIKey)
 	}
 }
-

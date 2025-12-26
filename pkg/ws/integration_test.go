@@ -282,4 +282,3 @@ func TestIntegration_SubscribeAndUnsubscribe(t *testing.T) {
 
 	t.Log("unsubscribe confirmation not received within timeout")
 }
-

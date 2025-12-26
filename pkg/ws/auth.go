@@ -80,4 +80,3 @@ func GenerateSignature(privateKey *rsa.PrivateKey, timestamp, method, path strin
 	message := timestamp + method + path
 	return SignMessage(privateKey, message)
 }
-

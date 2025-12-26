@@ -240,4 +240,3 @@ func TestRequest_JSON(t *testing.T) {
 		t.Errorf("cmd = %v, want subscribe", result["cmd"])
 	}
 }
-
