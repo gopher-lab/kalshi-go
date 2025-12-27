@@ -37,17 +37,17 @@ type KalshiMarket struct {
 
 // Prediction represents our model's prediction
 type Prediction struct {
-	Strike      string
-	Probability float64
-	Edge        float64 // Our prob - market implied prob
+	Strike         string
+	Probability    float64
+	Edge           float64 // Our prob - market implied prob
 	Recommendation string
-	Confidence  string
+	Confidence     string
 }
 
 const (
 	metarAPIURL = "https://aviationweather.gov/api/data/metar?ids=KLAX&hours=96&format=json"
 	laTimezone  = "America/Los_Angeles"
-	
+
 	// Historical normals for LA (late December)
 	normalHighF = 66
 	normalLowF  = 49
@@ -77,13 +77,13 @@ func main() {
 
 	// Analyze recent data
 	analysis := analyzeRecentData(observations, loc)
-	
+
 	// Print current conditions
 	printCurrentConditions(observations, loc)
-	
+
 	// Print recent history
 	printRecentHistory(analysis)
-	
+
 	// Define Kalshi market (from user's input)
 	markets := []KalshiMarket{
 		{Strike: "55 or below", YesPrice: 0.04, NoPrice: 0.98},
@@ -93,13 +93,13 @@ func main() {
 		{Strike: "62-63", YesPrice: 0.30, NoPrice: 0.73},
 		{Strike: "64 or above", YesPrice: 0.13, NoPrice: 0.92},
 	}
-	
+
 	// Generate predictions
 	predictions := generatePredictions(analysis, markets)
-	
+
 	// Print market analysis
 	printMarketAnalysis(markets, predictions)
-	
+
 	// Print trading recommendation
 	printRecommendation(predictions, analysis)
 }
@@ -248,9 +248,9 @@ func containsRain(wx string) bool {
 func generatePredictions(analysis RecentAnalysis, markets []KalshiMarket) []Prediction {
 	// Build probability distribution based on historical data
 	// Use the average + trend adjustment
-	
+
 	expectedMax := analysis.AvgMaxF
-	
+
 	// Trend adjustment
 	switch analysis.TrendDirection {
 	case "warming":
@@ -258,27 +258,27 @@ func generatePredictions(analysis RecentAnalysis, markets []KalshiMarket) []Pred
 	case "cooling":
 		expectedMax -= 1.5
 	}
-	
+
 	// Rain adjustment (rain typically means cooler temps)
 	if analysis.HasRain {
 		expectedMax -= 1.0
 	}
-	
+
 	// Standard deviation from historical data (~3°F for LA winter)
 	stdDev := 3.0
-	
+
 	fmt.Printf("📊 MODEL PARAMETERS:\n")
 	fmt.Printf("   Expected Max (CLI): %.1f°F\n", expectedMax)
 	fmt.Printf("   Std Dev: %.1f°F\n", stdDev)
 	fmt.Printf("   Trend: %s\n", analysis.TrendDirection)
 	fmt.Printf("   Recent Rain: %v\n\n", analysis.HasRain)
-	
+
 	// Calculate probabilities for each bracket
 	predictions := make([]Prediction, len(markets))
-	
+
 	for i, market := range markets {
 		var prob float64
-		
+
 		switch market.Strike {
 		case "55 or below":
 			prob = normalCDF(55.5, expectedMax, stdDev)
@@ -293,17 +293,17 @@ func generatePredictions(analysis RecentAnalysis, markets []KalshiMarket) []Pred
 		case "64 or above":
 			prob = 1 - normalCDF(63.5, expectedMax, stdDev)
 		}
-		
+
 		// Market implied probability
 		impliedProb := market.YesPrice
-		
+
 		// Edge = our probability - market probability
 		edge := prob - impliedProb
-		
+
 		// Determine recommendation
 		rec := "PASS"
 		confidence := "Low"
-		
+
 		if edge > 0.10 { // 10%+ edge
 			rec = "BUY YES"
 			if edge > 0.20 {
@@ -319,7 +319,7 @@ func generatePredictions(analysis RecentAnalysis, markets []KalshiMarket) []Pred
 				confidence = "Medium"
 			}
 		}
-		
+
 		predictions[i] = Prediction{
 			Strike:         market.Strike,
 			Probability:    prob,
@@ -328,7 +328,7 @@ func generatePredictions(analysis RecentAnalysis, markets []KalshiMarket) []Pred
 			Confidence:     confidence,
 		}
 	}
-	
+
 	return predictions
 }
 
@@ -341,10 +341,10 @@ func printCurrentConditions(observations []METARObservation, loc *time.Location)
 	if len(observations) == 0 {
 		return
 	}
-	
+
 	latest := observations[0]
 	t := time.Unix(latest.ObsTime, 0).In(loc)
-	
+
 	fmt.Println("=" + repeatStr("=", 78))
 	fmt.Println("CURRENT CONDITIONS AT LAX")
 	fmt.Println("=" + repeatStr("=", 78))
@@ -364,12 +364,12 @@ func printRecentHistory(analysis RecentAnalysis) {
 	fmt.Println("=" + repeatStr("=", 78))
 	fmt.Printf("%-12s  %-10s  %-10s  %-15s\n", "Date", "METAR Max", "CLI Est*", "Weather")
 	fmt.Printf("%-12s  %-10s  %-10s  %-15s\n", "----", "---------", "--------", "-------")
-	
+
 	for _, day := range analysis.Days {
-		fmt.Printf("%-12s  %-10d  %-10d  %-15s\n", 
+		fmt.Printf("%-12s  %-10d  %-10d  %-15s\n",
 			day.Date, day.MaxTempF, day.CLIMaxF, day.Weather)
 	}
-	
+
 	fmt.Println()
 	fmt.Printf("Average CLI Max: %.1f°F\n", analysis.AvgMaxF)
 	fmt.Printf("Trend: %s\n", analysis.TrendDirection)
@@ -382,23 +382,23 @@ func printMarketAnalysis(markets []KalshiMarket, predictions []Prediction) {
 	fmt.Println("MARKET ANALYSIS - December 27, 2025")
 	fmt.Println("=" + repeatStr("=", 78))
 	fmt.Println()
-	
+
 	fmt.Printf("%-14s  %-8s  %-10s  %-8s  %-10s  %-12s\n",
 		"Strike", "Mkt Yes", "Our Prob", "Edge", "Action", "Confidence")
 	fmt.Printf("%-14s  %-8s  %-10s  %-8s  %-10s  %-12s\n",
 		"------", "-------", "--------", "----", "------", "----------")
-	
+
 	for i, market := range markets {
 		pred := predictions[i]
 		edgeStr := fmt.Sprintf("%+.0f%%", pred.Edge*100)
-		
+
 		actionIcon := "  "
 		if pred.Recommendation == "BUY YES" {
 			actionIcon = "🟢"
 		} else if pred.Recommendation == "BUY NO" {
 			actionIcon = "🔴"
 		}
-		
+
 		fmt.Printf("%-14s  %-8.0f¢  %-10.0f%%  %-8s  %s %-8s  %-12s\n",
 			market.Strike,
 			market.YesPrice*100,
@@ -416,7 +416,7 @@ func printRecommendation(predictions []Prediction, analysis RecentAnalysis) {
 	fmt.Println("🎯 TRADING RECOMMENDATION")
 	fmt.Println("=" + repeatStr("=", 78))
 	fmt.Println()
-	
+
 	// Find best opportunities
 	var bestYes, bestNo *Prediction
 	for i := range predictions {
@@ -428,7 +428,7 @@ func printRecommendation(predictions []Prediction, analysis RecentAnalysis) {
 			bestNo = p
 		}
 	}
-	
+
 	if bestYes != nil && bestYes.Edge > 0.05 {
 		fmt.Printf("✅ BUY YES on \"%s\"\n", bestYes.Strike)
 		fmt.Printf("   Model Probability: %.0f%%\n", bestYes.Probability*100)
@@ -437,7 +437,7 @@ func printRecommendation(predictions []Prediction, analysis RecentAnalysis) {
 		fmt.Printf("   Confidence: %s\n", bestYes.Confidence)
 		fmt.Println()
 	}
-	
+
 	if bestNo != nil && bestNo.Edge < -0.05 {
 		fmt.Printf("✅ BUY NO on \"%s\"\n", bestNo.Strike)
 		fmt.Printf("   Model Probability (NO): %.0f%%\n", (1-bestNo.Probability)*100)
@@ -445,19 +445,19 @@ func printRecommendation(predictions []Prediction, analysis RecentAnalysis) {
 		fmt.Printf("   Confidence: %s\n", bestNo.Confidence)
 		fmt.Println()
 	}
-	
+
 	// Cross-validate with NWS forecast
 	fmt.Println("🌤️  NWS OFFICIAL FORECAST (api.weather.gov):")
 	fmt.Println("   Saturday Dec 27: 61°F, Mostly Sunny")
 	fmt.Println("   With +1°F CLI calibration: ~62°F")
 	fmt.Println()
-	
+
 	// Overall outlook
 	fmt.Println("📈 FORECAST SUMMARY:")
 	fmt.Printf("   Model Expected: %.0f°F (based on recent data)\n", analysis.AvgMaxF)
 	fmt.Println("   NWS Forecast: 61°F (62°F with CLI calibration)")
 	fmt.Printf("   Most Likely Bracket: ")
-	
+
 	// Find highest probability bracket
 	maxProb := 0.0
 	maxBracket := ""
@@ -468,7 +468,7 @@ func printRecommendation(predictions []Prediction, analysis RecentAnalysis) {
 		}
 	}
 	fmt.Printf("%s (%.0f%% probability)\n", maxBracket, maxProb*100)
-	
+
 	fmt.Println()
 	fmt.Println("⚠️  RISK FACTORS:")
 	fmt.Println("   • Weather systems can shift - monitor updates")
@@ -478,7 +478,7 @@ func printRecommendation(predictions []Prediction, analysis RecentAnalysis) {
 	fmt.Println("   • Model based on limited data (5 days)")
 	fmt.Println("   • Recommend small position sizes ($5-10)")
 	fmt.Println()
-	
+
 	fmt.Println("📋 ACTION PLAN:")
 	fmt.Println("   1. Check weather forecast for Dec 27 (NWS, AccuWeather)")
 	fmt.Println("   2. Monitor METAR tomorrow morning for early signals")
@@ -498,4 +498,3 @@ func repeatStr(s string, n int) string {
 	}
 	return result
 }
-

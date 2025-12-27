@@ -46,38 +46,38 @@ type CreateOrderRequest struct {
 	Side            Side        `json:"side"`
 	Type            OrderType   `json:"type"`
 	Count           int         `json:"count"`
-	YesPrice        int         `json:"yes_price,omitempty"`         // In cents (1-99)
-	NoPrice         int         `json:"no_price,omitempty"`          // In cents (1-99)
+	YesPrice        int         `json:"yes_price,omitempty"` // In cents (1-99)
+	NoPrice         int         `json:"no_price,omitempty"`  // In cents (1-99)
 	ClientOrderID   string      `json:"client_order_id,omitempty"`
-	Expiration      string      `json:"expiration_ts,omitempty"`     // RFC3339 timestamp
+	Expiration      string      `json:"expiration_ts,omitempty"` // RFC3339 timestamp
 	SellPositionCap int         `json:"sell_position_floor,omitempty"`
-	BuyMaxCost      int         `json:"buy_max_cost,omitempty"`      // Max cost in cents
+	BuyMaxCost      int         `json:"buy_max_cost,omitempty"` // Max cost in cents
 }
 
 // Order represents an order.
 type Order struct {
-	OrderID             string      `json:"order_id"`
-	Ticker              string      `json:"ticker"`
-	Action              OrderAction `json:"action"`
-	Side                Side        `json:"side"`
-	Type                OrderType   `json:"type"`
-	Status              OrderStatus `json:"status"`
-	YesPrice            int         `json:"yes_price"`
-	NoPrice             int         `json:"no_price"`
-	CreatedTime         string      `json:"created_time"`
-	ExpirationTime      string      `json:"expiration_time"`
-	ClientOrderID       string      `json:"client_order_id"`
-	OrderGroupID        string      `json:"order_group_id"`
-	PlaceCount          int         `json:"place_count"`
-	DecreaseCount       int         `json:"decrease_count"`
-	QueuePosition       int         `json:"queue_position"`
-	RemainingCount      int         `json:"remaining_count"`
-	TakerFillCount      int         `json:"taker_fill_count"`
-	MakerFillCount      int         `json:"maker_fill_count"`
-	TakerFillCost       int         `json:"taker_fill_cost"`
-	MakerFillCost       int         `json:"maker_fill_cost"`
-	LastUpdateTime      string      `json:"last_update_time"`
-	Ticker2             string      `json:"ticker_2,omitempty"`
+	OrderID        string      `json:"order_id"`
+	Ticker         string      `json:"ticker"`
+	Action         OrderAction `json:"action"`
+	Side           Side        `json:"side"`
+	Type           OrderType   `json:"type"`
+	Status         OrderStatus `json:"status"`
+	YesPrice       int         `json:"yes_price"`
+	NoPrice        int         `json:"no_price"`
+	CreatedTime    string      `json:"created_time"`
+	ExpirationTime string      `json:"expiration_time"`
+	ClientOrderID  string      `json:"client_order_id"`
+	OrderGroupID   string      `json:"order_group_id"`
+	PlaceCount     int         `json:"place_count"`
+	DecreaseCount  int         `json:"decrease_count"`
+	QueuePosition  int         `json:"queue_position"`
+	RemainingCount int         `json:"remaining_count"`
+	TakerFillCount int         `json:"taker_fill_count"`
+	MakerFillCount int         `json:"maker_fill_count"`
+	TakerFillCost  int         `json:"taker_fill_cost"`
+	MakerFillCost  int         `json:"maker_fill_cost"`
+	LastUpdateTime string      `json:"last_update_time"`
+	Ticker2        string      `json:"ticker_2,omitempty"`
 }
 
 // CreateOrderResponse represents a response from creating an order.
@@ -93,8 +93,8 @@ type GetOrdersResponse struct {
 
 // CancelOrderResponse represents a response from canceling an order.
 type CancelOrderResponse struct {
-	Order          Order `json:"order"`
-	ReducedBy      int   `json:"reduced_by"`
+	Order     Order `json:"order"`
+	ReducedBy int   `json:"reduced_by"`
 }
 
 // CreateOrder places a new order.
@@ -184,12 +184,12 @@ func (c *Client) BuyYes(ticker string, count int, maxPriceCents int) (*Order, er
 // BuyNo is a convenience function to buy NO contracts.
 func (c *Client) BuyNo(ticker string, count int, maxPriceCents int) (*Order, error) {
 	return c.CreateOrder(&CreateOrderRequest{
-		Ticker:   ticker,
-		Action:   OrderActionBuy,
-		Side:     SideNo,
-		Type:     OrderTypeLimit,
-		Count:    count,
-		NoPrice:  maxPriceCents,
+		Ticker:  ticker,
+		Action:  OrderActionBuy,
+		Side:    SideNo,
+		Type:    OrderTypeLimit,
+		Count:   count,
+		NoPrice: maxPriceCents,
 	})
 }
 
@@ -208,12 +208,11 @@ func (c *Client) SellYes(ticker string, count int, minPriceCents int) (*Order, e
 // SellNo is a convenience function to sell NO contracts.
 func (c *Client) SellNo(ticker string, count int, minPriceCents int) (*Order, error) {
 	return c.CreateOrder(&CreateOrderRequest{
-		Ticker:   ticker,
-		Action:   OrderActionSell,
-		Side:     SideNo,
-		Type:     OrderTypeLimit,
-		Count:    count,
-		NoPrice:  minPriceCents,
+		Ticker:  ticker,
+		Action:  OrderActionSell,
+		Side:    SideNo,
+		Type:    OrderTypeLimit,
+		Count:   count,
+		NoPrice: minPriceCents,
 	})
 }
-

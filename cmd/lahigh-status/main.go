@@ -119,4 +119,3 @@ func main() {
 	}
 	fmt.Println(strings.Repeat("=", 65))
 }
-

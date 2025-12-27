@@ -29,20 +29,20 @@ type METARObservation struct {
 
 // DailyStats holds statistics for a single day.
 type DailyStats struct {
-	Date           string
-	Observations   []METARObservation
-	FinalMaxC      float64   // Final max temp in Celsius for the day
-	FinalMaxF      int       // Final max temp in Fahrenheit (rounded)
-	MaxReachedAt   time.Time // When the max was first reached
-	HourlyMaxes    []HourlyMax
+	Date            string
+	Observations    []METARObservation
+	FinalMaxC       float64   // Final max temp in Celsius for the day
+	FinalMaxF       int       // Final max temp in Fahrenheit (rounded)
+	MaxReachedAt    time.Time // When the max was first reached
+	HourlyMaxes     []HourlyMax
 	EarlyPrediction *EarlyPrediction
 }
 
 // HourlyMax tracks the running max at each hour.
 type HourlyMax struct {
-	Hour       int
-	Time       time.Time
-	RunningMax float64 // Running max up to this point (Celsius)
+	Hour        int
+	Time        time.Time
+	RunningMax  float64 // Running max up to this point (Celsius)
 	CurrentTemp float64 // Current observation temp
 }
 
@@ -479,4 +479,3 @@ func repeatStr(s string, n int) string {
 	}
 	return result
 }
-

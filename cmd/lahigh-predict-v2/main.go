@@ -15,10 +15,10 @@ import (
 
 // METARObservation represents a single METAR weather observation.
 type METARObservation struct {
-	IcaoID    string  `json:"icaoId"`
-	ObsTime   int64   `json:"obsTime"`
-	Temp      float64 `json:"temp"`
-	WxString  string  `json:"wxString"`
+	IcaoID   string  `json:"icaoId"`
+	ObsTime  int64   `json:"obsTime"`
+	Temp     float64 `json:"temp"`
+	WxString string  `json:"wxString"`
 }
 
 // NWSForecast represents the NWS forecast data
@@ -34,16 +34,16 @@ type NWSForecast struct {
 
 // KalshiMarket represents the market prices
 type KalshiMarket struct {
-	Strike   string
-	LowBound int
+	Strike    string
+	LowBound  int
 	HighBound int
-	YesPrice float64
+	YesPrice  float64
 }
 
 const (
-	metarAPIURL   = "https://aviationweather.gov/api/data/metar?ids=KLAX&hours=96&format=json"
+	metarAPIURL    = "https://aviationweather.gov/api/data/metar?ids=KLAX&hours=96&format=json"
 	nwsForecastURL = "https://api.weather.gov/gridpoints/LOX/154,44/forecast"
-	laTimezone    = "America/Los_Angeles"
+	laTimezone     = "America/Los_Angeles"
 )
 
 func main() {
@@ -86,7 +86,7 @@ func main() {
 
 	// Apply calibration
 	expectedCLI := float64(saturdayForecast) + calibration
-	
+
 	fmt.Println("=" + strings.Repeat("=", 78))
 	fmt.Println("IMPROVED PREDICTION FOR DECEMBER 27, 2025")
 	fmt.Println("=" + strings.Repeat("=", 78))
@@ -113,7 +113,7 @@ func main() {
 	fmt.Println("MARKET ANALYSIS")
 	fmt.Println("=" + strings.Repeat("=", 78))
 	fmt.Println()
-	fmt.Printf("%-15s %-10s %-12s %-10s %-15s\n", 
+	fmt.Printf("%-15s %-10s %-12s %-10s %-15s\n",
 		"Strike", "Mkt Price", "Our Prob", "Edge", "Action")
 	fmt.Printf("%-15s %-10s %-12s %-10s %-15s\n",
 		"------", "---------", "--------", "----", "------")
@@ -124,7 +124,7 @@ func main() {
 
 	for i := range markets {
 		m := &markets[i]
-		
+
 		// Calculate probability using normal distribution
 		var prob float64
 		if m.HighBound == 999 {
@@ -132,12 +132,12 @@ func main() {
 		} else if m.LowBound == 0 {
 			prob = normalCDF(float64(m.HighBound)+0.5, expectedCLI, stdDev)
 		} else {
-			prob = normalCDF(float64(m.HighBound)+0.5, expectedCLI, stdDev) - 
-			       normalCDF(float64(m.LowBound)-0.5, expectedCLI, stdDev)
+			prob = normalCDF(float64(m.HighBound)+0.5, expectedCLI, stdDev) -
+				normalCDF(float64(m.LowBound)-0.5, expectedCLI, stdDev)
 		}
 
 		edge := prob - m.YesPrice
-		
+
 		action := "PASS"
 		if edge > 0.10 {
 			action = "🟢 BUY YES"
@@ -247,7 +247,7 @@ func printForecast(forecast *NWSForecast) {
 		if strings.Contains(period.Name, "Saturday") && !strings.Contains(period.Name, "Night") {
 			marker = "→ "
 		}
-		fmt.Printf("%s%-20s %3d°F  %s\n", 
+		fmt.Printf("%s%-20s %3d°F  %s\n",
 			marker, period.Name, period.Temperature, period.ShortForecast)
 	}
 	fmt.Println()
@@ -272,10 +272,10 @@ func calculateCalibration(observations []METARObservation, loc *time.Location) f
 	// Dec 25: METAR 66°F, CLI 67°F → +1
 	// Dec 24: METAR 64°F, CLI 64°F → 0
 	// Dec 23: METAR 63°F, CLI 64°F → +1
-	
+
 	// Average calibration is about +1°F
 	// But let's calculate from actual data
-	
+
 	sort.Slice(observations, func(i, j int) bool {
 		return observations[i].ObsTime < observations[j].ObsTime
 	})
@@ -321,4 +321,3 @@ func normalCDF(x, mean, stdDev float64) float64 {
 func celsiusToFahrenheit(c float64) int {
 	return int((c * 9.0 / 5.0) + 32.5)
 }
-

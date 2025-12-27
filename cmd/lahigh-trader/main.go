@@ -25,10 +25,10 @@ import (
 
 // Configuration
 var (
-	maxPositionSize = 10   // Max contracts per position
-	maxRiskCents    = 5000 // Max $50 at risk per trade
-	minEdge         = 0.05 // Minimum 5% edge to trade
-	cliCalibration  = 1.0  // METAR to CLI adjustment
+	maxPositionSize = 10               // Max contracts per position
+	maxRiskCents    = 5000             // Max $50 at risk per trade
+	minEdge         = 0.05             // Minimum 5% edge to trade
+	cliCalibration  = 1.0              // METAR to CLI adjustment
 	pollInterval    = 30 * time.Second // Fast polling for price changes
 )
 
@@ -42,38 +42,38 @@ type TradingState struct {
 	LastWeatherUpdate time.Time
 
 	// Market
-	Markets       map[string]*MarketState
-	Positions     map[string]*rest.Position
-	Balance       int // cents
-	
+	Markets   map[string]*MarketState
+	Positions map[string]*rest.Position
+	Balance   int // cents
+
 	// Trading
 	PendingOrders map[string]*rest.Order
 	ExecutedToday int
 }
 
 type MarketState struct {
-	Ticker      string
-	Strike      string
-	LowBound    int
-	HighBound   int
-	YesBid      int
-	YesAsk      int
-	NoBid       int
-	NoAsk       int
-	LastPrice   int
-	ModelProb   float64
-	Edge        float64
-	Signal      string
-	Crossed     bool
-	CrossedAt   time.Time
+	Ticker    string
+	Strike    string
+	LowBound  int
+	HighBound int
+	YesBid    int
+	YesAsk    int
+	NoBid     int
+	NoAsk     int
+	LastPrice int
+	ModelProb float64
+	Edge      float64
+	Signal    string
+	Crossed   bool
+	CrossedAt time.Time
 }
 
 // METAR observation
 type METARObservation struct {
-	IcaoID     string  `json:"icaoId"`
-	ObsTime    int64   `json:"obsTime"`
-	Temp       float64 `json:"temp"`
-	WxString   string  `json:"wxString"`
+	IcaoID   string  `json:"icaoId"`
+	ObsTime  int64   `json:"obsTime"`
+	Temp     float64 `json:"temp"`
+	WxString string  `json:"wxString"`
 }
 
 // NWS Forecast
@@ -182,7 +182,7 @@ func main() {
 	}
 
 	fmt.Printf("✓ Found %d markets\n", len(markets))
-	
+
 	// Initialize market states
 	for _, m := range markets {
 		strike := m.YesSubTitle
@@ -218,7 +218,7 @@ func main() {
 		wsClient := ws.New(
 			ws.WithAPIKeyOption(cfg.APIKey, cfg.PrivateKey),
 		)
-		
+
 		if err := wsClient.Connect(ctx); err != nil {
 			fmt.Printf("⚠ WebSocket connection failed: %v\n", err)
 			return
@@ -251,7 +251,7 @@ func main() {
 			// Update weather
 			prevMax := state.RunningMaxF
 			updateWeather(state)
-			
+
 			// Refresh market prices
 			refreshMarketPrices(state, client, *eventTicker)
 			updateMarketProbabilities(state)
@@ -261,10 +261,10 @@ func main() {
 
 			// Look for trading opportunities
 			opportunities := findOpportunities(state)
-			
+
 			if len(opportunities) > 0 {
 				printOpportunities(opportunities)
-				
+
 				if *autoTrade {
 					for _, opp := range opportunities {
 						executeTrade(client, state, opp)
@@ -273,10 +273,10 @@ func main() {
 					for _, opp := range opportunities {
 						fmt.Printf("\n🔔 TRADING OPPORTUNITY: %s\n", opp.Description)
 						fmt.Printf("   Execute trade? (y/n): ")
-						
+
 						input, _ := reader.ReadString('\n')
 						input = strings.TrimSpace(strings.ToLower(input))
-						
+
 						if input == "y" || input == "yes" {
 							executeTrade(client, state, opp)
 						} else {
@@ -349,7 +349,7 @@ func updateMarketProbabilities(state *TradingState) {
 	// Adjust uncertainty based on time of day
 	loc, _ := time.LoadLocation("America/Los_Angeles")
 	hour := time.Now().In(loc).Hour()
-	
+
 	switch {
 	case hour >= 20:
 		stdDev = 0.5
@@ -432,7 +432,7 @@ type Opportunity struct {
 	Strike      string
 	Action      string // "BUY_YES" or "BUY_NO"
 	Side        rest.Side
-	Price       int     // in cents
+	Price       int // in cents
 	Contracts   int
 	Edge        float64
 	Description string
@@ -467,7 +467,7 @@ func findOpportunities(state *TradingState) []Opportunity {
 				continue
 			}
 			opp.Contracts = calculatePosition(opp.Price, state.Balance)
-			opp.Description = fmt.Sprintf("BUY YES on \"%s\" @ %d¢ (Edge: +%.0f%%)", 
+			opp.Description = fmt.Sprintf("BUY YES on \"%s\" @ %d¢ (Edge: +%.0f%%)",
 				m.Strike, opp.Price, m.Edge*100)
 		} else {
 			// BUY NO
@@ -478,7 +478,7 @@ func findOpportunities(state *TradingState) []Opportunity {
 				continue
 			}
 			opp.Contracts = calculatePosition(opp.Price, state.Balance)
-			opp.Description = fmt.Sprintf("BUY NO on \"%s\" @ %d¢ (Edge: +%.0f%%)", 
+			opp.Description = fmt.Sprintf("BUY NO on \"%s\" @ %d¢ (Edge: +%.0f%%)",
 				m.Strike, opp.Price, absEdge*100)
 		}
 
@@ -502,7 +502,7 @@ func findOpportunities(state *TradingState) []Opportunity {
 func calculatePosition(priceCents, balanceCents int) int {
 	// Max contracts based on risk
 	maxByRisk := maxRiskCents / priceCents
-	
+
 	// Max contracts based on position size
 	contracts := maxPositionSize
 	if maxByRisk < contracts {
@@ -520,7 +520,7 @@ func calculatePosition(priceCents, balanceCents int) int {
 
 func executeTrade(client *rest.Client, state *TradingState, opp Opportunity) {
 	fmt.Printf("\n→ Executing: %s\n", opp.Description)
-	fmt.Printf("  Contracts: %d @ %d¢ = $%.2f\n", opp.Contracts, opp.Price, 
+	fmt.Printf("  Contracts: %d @ %d¢ = $%.2f\n", opp.Contracts, opp.Price,
 		float64(opp.Contracts*opp.Price)/100)
 
 	var order *rest.Order
@@ -539,7 +539,7 @@ func executeTrade(client *rest.Client, state *TradingState, opp Opportunity) {
 
 	fmt.Printf("  ✅ Order placed! ID: %s\n", order.OrderID)
 	fmt.Printf("     Status: %s\n", order.Status)
-	
+
 	state.PendingOrders[order.OrderID] = order
 	state.ExecutedToday++
 }
@@ -556,16 +556,16 @@ func printStatus(state *TradingState, client *rest.Client) {
 
 	fmt.Println("WEATHER:")
 	fmt.Printf("  🌡️  Current: %d°F\n", state.CurrentTempF)
-	fmt.Printf("  📈 Running Max: %d°F (METAR) → %d°F (Est. CLI)\n", 
+	fmt.Printf("  📈 Running Max: %d°F (METAR) → %d°F (Est. CLI)\n",
 		state.RunningMaxF, state.RunningMaxF+int(cliCalibration))
 	fmt.Printf("  🌤️  NWS Forecast: %d°F\n", state.NWSForecastF)
 	fmt.Printf("  🎯 Expected CLI: %d°F\n", state.ExpectedMaxF)
 	fmt.Println()
 
 	fmt.Println("MARKETS:")
-	fmt.Printf("%-18s %-8s %-8s %-10s %-8s %-12s\n", 
+	fmt.Printf("%-18s %-8s %-8s %-10s %-8s %-12s\n",
 		"Strike", "Bid", "Ask", "Model", "Edge", "Signal")
-	fmt.Printf("%-18s %-8s %-8s %-10s %-8s %-12s\n", 
+	fmt.Printf("%-18s %-8s %-8s %-10s %-8s %-12s\n",
 		"------", "---", "---", "-----", "----", "------")
 
 	for _, m := range getSortedMarkets(state) {
@@ -581,7 +581,7 @@ func printStatus(state *TradingState, client *rest.Client) {
 		fmt.Println("POSITIONS:")
 		for _, p := range positions {
 			if p.YesPosition > 0 || p.NoPosition > 0 {
-				fmt.Printf("  %s: YES=%d, NO=%d, Cost=$%.2f\n", 
+				fmt.Printf("  %s: YES=%d, NO=%d, Cost=$%.2f\n",
 					p.Ticker, p.YesPosition, p.NoPosition, float64(p.TotalCost)/100)
 			}
 		}
@@ -632,7 +632,7 @@ func printFinalSummary(state *TradingState, client *rest.Client) {
 	fmt.Println(strings.Repeat("=", 80))
 
 	fmt.Printf("📊 Orders Executed: %d\n", state.ExecutedToday)
-	
+
 	// Get final balance
 	balance, err := client.GetBalance()
 	if err == nil {
@@ -647,7 +647,7 @@ func printFinalSummary(state *TradingState, client *rest.Client) {
 			if p.YesPosition > 0 || p.NoPosition > 0 {
 				fmt.Printf("  %s\n", p.Ticker)
 				fmt.Printf("    YES: %d, NO: %d\n", p.YesPosition, p.NoPosition)
-				fmt.Printf("    Cost: $%.2f, Realized P&L: $%.2f\n", 
+				fmt.Printf("    Cost: $%.2f, Realized P&L: $%.2f\n",
 					float64(p.TotalCost)/100, float64(p.RealizedPnl)/100)
 			}
 		}
@@ -669,7 +669,7 @@ func getSortedMarkets(state *TradingState) []*MarketState {
 func parseStrike(title, subtitle string) string {
 	// Try to extract strike from title/subtitle
 	combined := title + " " + subtitle
-	
+
 	// Common patterns: "56-57", "55 or below", "64 or above"
 	if strings.Contains(combined, "below") {
 		return "55 or below"
@@ -677,14 +677,14 @@ func parseStrike(title, subtitle string) string {
 	if strings.Contains(combined, "above") || strings.Contains(combined, "higher") {
 		return "64 or above"
 	}
-	
+
 	// Look for number ranges
 	for _, s := range []string{"56-57", "58-59", "60-61", "62-63"} {
 		if strings.Contains(combined, s) {
 			return s
 		}
 	}
-	
+
 	return subtitle
 }
 
@@ -726,4 +726,3 @@ func parseStrikeBoundsFromAPI(floor, cap float64, strike string) (int, int) {
 func normalCDF(x, mean, stdDev float64) float64 {
 	return 0.5 * (1 + math.Erf((x-mean)/(stdDev*math.Sqrt2)))
 }
-

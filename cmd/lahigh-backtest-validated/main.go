@@ -52,26 +52,26 @@ type DayAnalysis struct {
 	EventTicker    string
 	WinningTicker  string
 	WinningBracket string
-	
+
 	// Prices at key hours (LA time)
-	Price7AM   int
-	Price9AM   int
-	Price10AM  int
-	Price11AM  int
-	Price12PM  int
-	Price1PM   int
-	
+	Price7AM  int
+	Price9AM  int
+	Price10AM int
+	Price11AM int
+	Price12PM int
+	Price1PM  int
+
 	// Trade counts
 	Trades7AM  int
 	Trades9AM  int
 	Trades10AM int
 	Trades11AM int
-	
+
 	// Edge analysis
-	BestEntryHour  string
-	BestEntryPrice int
+	BestEntryHour   string
+	BestEntryPrice  int
 	PotentialProfit int
-	EdgePercent    float64
+	EdgePercent     float64
 }
 
 // SimulatedTrade represents a simulated trade
@@ -104,12 +104,12 @@ func main() {
 	// Analyze each day
 	fmt.Println("→ Fetching trade history for each market...")
 	var analyses []DayAnalysis
-	
+
 	for i, event := range events {
 		if i > 0 && i%10 == 0 {
 			fmt.Printf("  Processed %d/%d events...\n", i, len(events))
 		}
-		
+
 		analysis, err := analyzeEvent(event)
 		if err != nil {
 			continue
@@ -117,24 +117,24 @@ func main() {
 		if analysis.Price10AM > 0 || analysis.Price9AM > 0 {
 			analyses = append(analyses, analysis)
 		}
-		
+
 		// Rate limiting
 		time.Sleep(100 * time.Millisecond)
 	}
-	
+
 	fmt.Printf("✓ Analyzed %d days with trade data\n", len(analyses))
 	fmt.Println()
 
 	// Print detailed analysis
 	printDetailedAnalysis(analyses)
-	
+
 	// Run simulated trading strategies
 	runSimulatedStrategies(analyses)
 }
 
 func fetchClosedEvents() ([]string, error) {
 	var events []string
-	
+
 	resp, err := http.Get("https://api.elections.kalshi.com/trade-api/v2/events?series_ticker=KXHIGHLAX&limit=100")
 	if err != nil {
 		return nil, err
@@ -142,7 +142,7 @@ func fetchClosedEvents() ([]string, error) {
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
-	
+
 	var eventsResp struct {
 		Events []struct {
 			EventTicker string `json:"event_ticker"`
@@ -212,7 +212,7 @@ func analyzeEvent(eventTicker string) (DayAnalysis, error) {
 	// Group trades by hour (LA time = UTC-8)
 	hourlyPrices := make(map[int][]int)
 	hourlyCounts := make(map[int]int)
-	
+
 	for _, trade := range trades {
 		hour := parseTradeHour(trade.CreatedTime, analysis.Date)
 		if hour >= 0 {
@@ -239,7 +239,7 @@ func analyzeEvent(eventTicker string) (DayAnalysis, error) {
 	analysis.Price11AM = avgPrice(11)
 	analysis.Price12PM = avgPrice(12)
 	analysis.Price1PM = avgPrice(13)
-	
+
 	analysis.Trades7AM = hourlyCounts[7]
 	analysis.Trades9AM = hourlyCounts[9]
 	analysis.Trades10AM = hourlyCounts[10]
@@ -248,7 +248,7 @@ func analyzeEvent(eventTicker string) (DayAnalysis, error) {
 	// Find best entry point
 	bestPrice := 100
 	bestHour := ""
-	
+
 	if analysis.Price7AM > 0 && analysis.Price7AM < bestPrice {
 		bestPrice = analysis.Price7AM
 		bestHour = "7 AM"
@@ -265,7 +265,7 @@ func analyzeEvent(eventTicker string) (DayAnalysis, error) {
 		bestPrice = analysis.Price11AM
 		bestHour = "11 AM"
 	}
-	
+
 	analysis.BestEntryHour = bestHour
 	analysis.BestEntryPrice = bestPrice
 	analysis.PotentialProfit = 100 - bestPrice
@@ -277,34 +277,34 @@ func analyzeEvent(eventTicker string) (DayAnalysis, error) {
 func fetchAllTrades(ticker string) ([]KalshiTrade, error) {
 	var allTrades []KalshiTrade
 	cursor := ""
-	
+
 	for i := 0; i < 20; i++ {
 		url := fmt.Sprintf("https://api.elections.kalshi.com/trade-api/v2/markets/trades?ticker=%s&limit=100", ticker)
 		if cursor != "" {
 			url += "&cursor=" + cursor
 		}
-		
+
 		resp, err := http.Get(url)
 		if err != nil {
 			return allTrades, err
 		}
-		
+
 		body, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
-		
+
 		var tradesResp TradesResponse
 		json.Unmarshal(body, &tradesResp)
-		
+
 		allTrades = append(allTrades, tradesResp.Trades...)
-		
+
 		if tradesResp.Cursor == "" {
 			break
 		}
 		cursor = tradesResp.Cursor
-		
+
 		time.Sleep(50 * time.Millisecond)
 	}
-	
+
 	return allTrades, nil
 }
 
@@ -334,17 +334,17 @@ func parseTradeHour(timestamp, expectedDate string) int {
 	if err != nil {
 		return -1
 	}
-	
+
 	// Convert to LA time
 	la, _ := time.LoadLocation("America/Los_Angeles")
 	laTime := t.In(la)
-	
+
 	// Only count trades on the expected date
 	dateStr := laTime.Format("2006-01-02")
 	if dateStr != expectedDate {
 		return -1
 	}
-	
+
 	return laTime.Hour()
 }
 
@@ -353,17 +353,17 @@ func printDetailedAnalysis(analyses []DayAnalysis) {
 	fmt.Println("DETAILED PRICE ANALYSIS")
 	fmt.Println(strings.Repeat("=", 80))
 	fmt.Println()
-	
+
 	fmt.Printf("%-12s %-12s %7s %7s %7s %7s %10s %8s\n",
 		"Date", "Winner", "7 AM", "9 AM", "10 AM", "11 AM", "Best Entry", "Profit")
 	fmt.Printf("%-12s %-12s %7s %7s %7s %7s %10s %8s\n",
 		"----", "------", "----", "----", "-----", "-----", "----------", "------")
-	
+
 	// Sort by date descending
 	sort.Slice(analyses, func(i, j int) bool {
 		return analyses[i].Date > analyses[j].Date
 	})
-	
+
 	for _, a := range analyses {
 		p7 := "-"
 		if a.Price7AM > 0 {
@@ -381,23 +381,23 @@ func printDetailedAnalysis(analyses []DayAnalysis) {
 		if a.Price11AM > 0 {
 			p11 = fmt.Sprintf("%d¢", a.Price11AM)
 		}
-		
+
 		profit := fmt.Sprintf("+%d¢", a.PotentialProfit)
 		if a.BestEntryPrice >= 90 {
 			profit = fmt.Sprintf("+%d¢ ⚠️", a.PotentialProfit)
 		} else if a.BestEntryPrice < 50 {
 			profit = fmt.Sprintf("+%d¢ 🎯", a.PotentialProfit)
 		}
-		
+
 		fmt.Printf("%-12s %-12s %7s %7s %7s %7s %10s %8s\n",
 			a.Date, a.WinningBracket, p7, p9, p10, p11, a.BestEntryHour, profit)
 	}
 	fmt.Println()
-	
+
 	// Summary statistics
 	var totalProfit, bigEdgeDays, noEdgeDays int
 	var profits []int
-	
+
 	for _, a := range analyses {
 		if a.BestEntryPrice > 0 && a.BestEntryPrice < 90 {
 			totalProfit += a.PotentialProfit
@@ -409,12 +409,12 @@ func printDetailedAnalysis(analyses []DayAnalysis) {
 			noEdgeDays++
 		}
 	}
-	
+
 	fmt.Println("SUMMARY STATISTICS:")
 	fmt.Printf("  📊 Days analyzed: %d\n", len(analyses))
-	fmt.Printf("  🎯 Days with big edge (<50¢ entry): %d (%.1f%%)\n", 
+	fmt.Printf("  🎯 Days with big edge (<50¢ entry): %d (%.1f%%)\n",
 		bigEdgeDays, float64(bigEdgeDays)/float64(len(analyses))*100)
-	fmt.Printf("  ⚠️  Days with no edge (>90¢ entry): %d (%.1f%%)\n", 
+	fmt.Printf("  ⚠️  Days with no edge (>90¢ entry): %d (%.1f%%)\n",
 		noEdgeDays, float64(noEdgeDays)/float64(len(analyses))*100)
 	fmt.Printf("  💰 Total potential profit: $%.2f\n", float64(totalProfit)/100)
 	if len(profits) > 0 {
@@ -432,7 +432,7 @@ func runSimulatedStrategies(analyses []DayAnalysis) {
 	fmt.Println("SIMULATED TRADING STRATEGIES")
 	fmt.Println(strings.Repeat("=", 80))
 	fmt.Println()
-	
+
 	// Strategy 1: Always buy at 10 AM
 	strategy10AM := simulateStrategy(analyses, func(a DayAnalysis) (int, bool) {
 		if a.Price10AM > 0 {
@@ -440,7 +440,7 @@ func runSimulatedStrategies(analyses []DayAnalysis) {
 		}
 		return 0, false
 	}, "Buy at 10 AM")
-	
+
 	// Strategy 2: Buy at best available price (7-11 AM)
 	strategyBest := simulateStrategy(analyses, func(a DayAnalysis) (int, bool) {
 		if a.BestEntryPrice > 0 && a.BestEntryPrice < 100 {
@@ -448,7 +448,7 @@ func runSimulatedStrategies(analyses []DayAnalysis) {
 		}
 		return 0, false
 	}, "Buy at best price (7-11 AM)")
-	
+
 	// Strategy 3: Only buy when edge > 50% (<50¢)
 	strategyEdge := simulateStrategy(analyses, func(a DayAnalysis) (int, bool) {
 		if a.BestEntryPrice > 0 && a.BestEntryPrice < 50 {
@@ -456,7 +456,7 @@ func runSimulatedStrategies(analyses []DayAnalysis) {
 		}
 		return 0, false
 	}, "Only buy when price < 50¢")
-	
+
 	// Strategy 4: Only buy when edge exists but not extreme (<80¢)
 	strategyModerate := simulateStrategy(analyses, func(a DayAnalysis) (int, bool) {
 		if a.BestEntryPrice > 0 && a.BestEntryPrice < 80 {
@@ -464,18 +464,18 @@ func runSimulatedStrategies(analyses []DayAnalysis) {
 		}
 		return 0, false
 	}, "Buy when price < 80¢")
-	
+
 	// Print results
 	fmt.Printf("%-30s %7s %7s %9s %12s %8s\n",
 		"Strategy", "Trades", "W%", "Net P&L", "Avg Profit", "Sharpe")
 	fmt.Printf("%-30s %7s %7s %9s %12s %8s\n",
 		strings.Repeat("-", 30), "------", "----", "--------", "----------", "------")
-	
+
 	printStrategyResult(strategy10AM)
 	printStrategyResult(strategyBest)
 	printStrategyResult(strategyEdge)
 	printStrategyResult(strategyModerate)
-	
+
 	fmt.Println()
 	fmt.Println("💡 KEY INSIGHT:")
 	fmt.Println("   The edge is REAL but CONDITIONAL:")
@@ -486,53 +486,53 @@ func runSimulatedStrategies(analyses []DayAnalysis) {
 }
 
 type StrategyResult struct {
-	Name       string
-	Trades     int
-	Wins       int
-	TotalPnL   float64
-	AvgPnL     float64
-	StdDev     float64
+	Name        string
+	Trades      int
+	Wins        int
+	TotalPnL    float64
+	AvgPnL      float64
+	StdDev      float64
 	SharpeRatio float64
-	PnLs       []float64
+	PnLs        []float64
 }
 
 func simulateStrategy(analyses []DayAnalysis, selector func(DayAnalysis) (int, bool), name string) StrategyResult {
 	result := StrategyResult{Name: name}
-	
+
 	for _, a := range analyses {
 		price, ok := selector(a)
 		if !ok {
 			continue
 		}
-		
+
 		result.Trades++
 		result.Wins++ // All winning brackets
-		
+
 		// Calculate net profit after 7% fee
 		grossProfit := 100 - price
 		fee := float64(grossProfit) * kalshiFee
 		netProfit := float64(grossProfit) - fee
-		
+
 		result.TotalPnL += netProfit
 		result.PnLs = append(result.PnLs, netProfit)
 	}
-	
+
 	if result.Trades > 0 {
 		result.AvgPnL = result.TotalPnL / float64(result.Trades)
-		
+
 		// Calculate std dev
 		var variance float64
 		for _, pnl := range result.PnLs {
 			variance += (pnl - result.AvgPnL) * (pnl - result.AvgPnL)
 		}
 		result.StdDev = math.Sqrt(variance / float64(len(result.PnLs)))
-		
+
 		// Sharpe (annualized)
 		if result.StdDev > 0 {
 			result.SharpeRatio = (result.AvgPnL / result.StdDev) * math.Sqrt(252)
 		}
 	}
-	
+
 	return result
 }
 
@@ -541,7 +541,7 @@ func printStrategyResult(r StrategyResult) {
 	if r.Trades > 0 {
 		winRate = float64(r.Wins) / float64(r.Trades) * 100
 	}
-	
+
 	fmt.Printf("%-30s %7d %6.0f%% %8.2f$ %11.1f¢ %8.1f\n",
 		r.Name,
 		r.Trades,
@@ -550,4 +550,3 @@ func printStrategyResult(r StrategyResult) {
 		r.AvgPnL,
 		r.SharpeRatio)
 }
-

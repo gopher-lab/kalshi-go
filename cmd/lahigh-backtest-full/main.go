@@ -18,23 +18,23 @@ import (
 
 // Configuration
 const (
-	kalshiFee       = 0.07  // 7% fee on winnings
-	cliCalibration  = 1.0   // METAR to CLI adjustment
-	minEdge         = 0.05  // 5% minimum edge to trade
+	kalshiFee      = 0.07 // 7% fee on winnings
+	cliCalibration = 1.0  // METAR to CLI adjustment
+	minEdge        = 0.05 // 5% minimum edge to trade
 )
 
 // Data structures
 type DayData struct {
-	Date           string
-	METARMax       float64
-	METARMaxTime   string
-	EstimatedCLI   int
-	KalshiSettled  string
-	SettledTemp    int
-	Correct        bool
-	
+	Date          string
+	METARMax      float64
+	METARMaxTime  string
+	EstimatedCLI  int
+	KalshiSettled string
+	SettledTemp   int
+	Correct       bool
+
 	// Hourly data for intraday analysis
-	HourlyTemps    map[int]float64 // hour -> temp
+	HourlyTemps      map[int]float64 // hour -> temp
 	RunningMaxByHour map[int]float64 // hour -> running max at that hour
 }
 
@@ -48,7 +48,7 @@ type Trade struct {
 	Ticker     string
 	Side       string // "YES" or "NO"
 	Strike     string
-	EntryPrice int    // cents
+	EntryPrice int // cents
 	EntryHour  int
 	Won        bool
 	Payout     float64
@@ -163,7 +163,7 @@ func fetchHistoricalMETAR() (map[string]map[int]float64, error) {
 	defer resp.Body.Close()
 
 	reader := csv.NewReader(resp.Body)
-	
+
 	// Skip header
 	_, err = reader.Read()
 	if err != nil {
@@ -172,7 +172,7 @@ func fetchHistoricalMETAR() (map[string]map[int]float64, error) {
 
 	// Parse data: date -> hour -> temp
 	data := make(map[string]map[int]float64)
-	
+
 	for {
 		record, err := reader.Read()
 		if err == io.EOF {
@@ -197,7 +197,7 @@ func fetchHistoricalMETAR() (map[string]map[int]float64, error) {
 			continue
 		}
 		hour, _ := strconv.Atoi(timeParts[0])
-		
+
 		temp, err := strconv.ParseFloat(record[2], 64)
 		if err != nil {
 			continue
@@ -217,7 +217,7 @@ func fetchHistoricalMETAR() (map[string]map[int]float64, error) {
 
 func fetchKalshiSettlements() (map[string]string, error) {
 	settlements := make(map[string]string)
-	
+
 	// Fetch events list
 	resp, err := http.Get("https://api.elections.kalshi.com/trade-api/v2/events?series_ticker=KXHIGHLAX&limit=200")
 	if err != nil {
@@ -226,7 +226,7 @@ func fetchKalshiSettlements() (map[string]string, error) {
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
-	
+
 	var eventsResp struct {
 		Events []struct {
 			EventTicker string `json:"event_ticker"`
@@ -246,7 +246,7 @@ func fetchKalshiSettlements() (map[string]string, error) {
 
 		var marketsResp struct {
 			Markets []struct {
-				Result     string `json:"result"`
+				Result      string `json:"result"`
 				YesSubTitle string `json:"yes_sub_title"`
 			} `json:"markets"`
 		}
@@ -318,20 +318,20 @@ func processData(metarData map[string]map[int]float64, settlements map[string]st
 		// Parse settlement bracket to temperature
 		settledTemp := parseSettlementTemp(settlement)
 		estimatedCLI := int(maxTemp + cliCalibration)
-		
+
 		// Check if our estimate matches
 		correct := (estimatedCLI >= settledTemp-1) && (estimatedCLI <= settledTemp+1)
 
 		days = append(days, &DayData{
-			Date:              date,
-			METARMax:          maxTemp,
-			METARMaxTime:      fmt.Sprintf("%02d:00", maxHour),
-			EstimatedCLI:      estimatedCLI,
-			KalshiSettled:     settlement,
-			SettledTemp:       settledTemp,
-			Correct:           correct,
-			HourlyTemps:       hourlyTemps,
-			RunningMaxByHour:  runningMax,
+			Date:             date,
+			METARMax:         maxTemp,
+			METARMaxTime:     fmt.Sprintf("%02d:00", maxHour),
+			EstimatedCLI:     estimatedCLI,
+			KalshiSettled:    settlement,
+			SettledTemp:      settledTemp,
+			Correct:          correct,
+			HourlyTemps:      hourlyTemps,
+			RunningMaxByHour: runningMax,
 		})
 	}
 
@@ -364,7 +364,7 @@ func validateCalibration(days []*DayData) {
 
 	var diffs []float64
 	correct := 0
-	
+
 	for _, day := range days {
 		diff := float64(day.SettledTemp) - day.METARMax
 		diffs = append(diffs, diff)
@@ -382,7 +382,7 @@ func validateCalibration(days []*DayData) {
 
 	fmt.Printf("📊 Days analyzed: %d\n", len(days))
 	fmt.Printf("📈 Average CLI - METAR difference: %.2f°F\n", avgDiff)
-	fmt.Printf("✓ Model accuracy (±1°F): %.1f%% (%d/%d)\n", 
+	fmt.Printf("✓ Model accuracy (±1°F): %.1f%% (%d/%d)\n",
 		float64(correct)/float64(len(days))*100, correct, len(days))
 	fmt.Printf("📝 Calibration factor used: +%.1f°F\n", cliCalibration)
 	fmt.Println()
@@ -391,7 +391,7 @@ func validateCalibration(days []*DayData) {
 	fmt.Println("Last 10 days:")
 	fmt.Printf("%-12s %-10s %-10s %-15s %-8s\n", "Date", "METAR Max", "Est. CLI", "Kalshi Settled", "Match?")
 	fmt.Printf("%-12s %-10s %-10s %-15s %-8s\n", "----", "---------", "--------", "--------------", "------")
-	
+
 	start := len(days) - 10
 	if start < 0 {
 		start = 0
@@ -402,7 +402,7 @@ func validateCalibration(days []*DayData) {
 		if d.Correct {
 			match = "✅"
 		}
-		fmt.Printf("%-12s %-10.0f°F %-10d°F %-15s %-8s\n", 
+		fmt.Printf("%-12s %-10.0f°F %-10d°F %-15s %-8s\n",
 			d.Date, d.METARMax, d.EstimatedCLI, d.KalshiSettled, match)
 	}
 	fmt.Println()
@@ -414,7 +414,7 @@ func strategyNWSForecast(day *DayData, _ int) (*Trade, bool) {
 	// Use the settled temp as "perfect forecast" for baseline
 	expectedHigh := day.SettledTemp
 	bracket := determineBracket(expectedHigh)
-	
+
 	return &Trade{
 		Strike:     bracket,
 		Side:       "YES",
@@ -429,7 +429,7 @@ func strategyEarlyMETAR(day *DayData, _ int) (*Trade, bool) {
 		// If already at or near the day's high, be cautious
 		estimatedHigh := int(temp + 5 + cliCalibration) // Typical afternoon increase
 		bracket := determineBracket(estimatedHigh)
-		
+
 		return &Trade{
 			Strike:     bracket,
 			Side:       "YES",
@@ -448,11 +448,11 @@ func strategyRunningMaxLock(day *DayData, _ int) (*Trade, bool) {
 			if estimatedCLI >= day.SettledTemp {
 				bracket := determineBracket(day.SettledTemp)
 				// Earlier lock = worse odds (more uncertainty priced in)
-				entryPrice := 30 + (hour - 8) * 5
+				entryPrice := 30 + (hour-8)*5
 				if entryPrice > 85 {
 					entryPrice = 85
 				}
-				
+
 				return &Trade{
 					Strike:     bracket,
 					Side:       "YES",
@@ -470,7 +470,7 @@ func strategyAfternoonConfirm(day *DayData, _ int) (*Trade, bool) {
 	if runningMax, ok := day.RunningMaxByHour[15]; ok {
 		estimatedCLI := int(runningMax + cliCalibration)
 		bracket := determineBracket(estimatedCLI)
-		
+
 		return &Trade{
 			Strike:     bracket,
 			Side:       "YES",
@@ -487,7 +487,7 @@ func strategyEdgeBased(day *DayData, _ int) (*Trade, bool) {
 	if runningMax, ok := day.RunningMaxByHour[12]; ok {
 		estimatedCLI := int(runningMax + cliCalibration + 2) // Expect +2 more
 		bracket := determineBracket(estimatedCLI)
-		
+
 		// Only trade if our estimate differs meaningfully from market
 		diff := math.Abs(float64(estimatedCLI - day.SettledTemp))
 		if diff <= 2 { // Good estimate = edge
@@ -541,8 +541,8 @@ func runBacktest(strategy Strategy, days []*DayData) BacktestResult {
 
 		// Determine if trade won
 		expectedBracket := determineBracket(day.SettledTemp)
-		trade.Won = (trade.Strike == expectedBracket) || 
-			         strings.Contains(day.KalshiSettled, strings.Split(trade.Strike, "-")[0])
+		trade.Won = (trade.Strike == expectedBracket) ||
+			strings.Contains(day.KalshiSettled, strings.Split(trade.Strike, "-")[0])
 
 		if trade.Won {
 			// Win: receive $1, minus entry cost and fee
@@ -683,7 +683,7 @@ func printDetailedAnalysis(days []*DayData, results []BacktestResult) {
 	// Key insights
 	fmt.Println("💡 KEY INSIGHTS:")
 	fmt.Println("   1. METAR→CLI calibration of +1°F is validated")
-	fmt.Printf("   2. Model accuracy: %.1f%% within ±1°F\n", 
+	fmt.Printf("   2. Model accuracy: %.1f%% within ±1°F\n",
 		float64(countCorrect(days))/float64(len(days))*100)
 	fmt.Println("   3. Early entry provides better odds but higher variance")
 	fmt.Println("   4. Afternoon confirmation has highest win rate but lower returns")
@@ -722,4 +722,3 @@ func min(a, b int) int {
 	}
 	return b
 }
-

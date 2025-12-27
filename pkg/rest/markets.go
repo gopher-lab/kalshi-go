@@ -7,48 +7,48 @@ import (
 
 // Market represents a Kalshi market.
 type Market struct {
-	Ticker              string  `json:"ticker"`
-	EventTicker         string  `json:"event_ticker"`
-	MarketType          string  `json:"market_type"`
-	Title               string  `json:"title"`
-	Subtitle            string  `json:"subtitle"`
-	YesSubTitle         string  `json:"yes_sub_title"`
-	NoSubTitle          string  `json:"no_sub_title"`
-	Status              string  `json:"status"`
-	YesBid              int     `json:"yes_bid"`
-	YesAsk              int     `json:"yes_ask"`
-	NoBid               int     `json:"no_bid"`
-	NoAsk               int     `json:"no_ask"`
-	LastPrice           int     `json:"last_price"`
-	PreviousYesBid      int     `json:"previous_yes_bid"`
-	PreviousYesAsk      int     `json:"previous_yes_ask"`
-	PreviousPrice       int     `json:"previous_price"`
-	Volume              int     `json:"volume"`
-	Volume24H           int     `json:"volume_24h"`
-	Liquidity           int     `json:"liquidity"`
-	OpenInterest        int     `json:"open_interest"`
-	Result              string  `json:"result"`
-	CapStrike           float64 `json:"cap_strike"`
-	FloorStrike         float64 `json:"floor_strike"`
-	ExpectedExpiryTime  string  `json:"expected_expiration_time"`
-	ExpirationTime      string  `json:"expiration_time"`
-	LatestExpiryTime    string  `json:"latest_expiration_time"`
-	SettlementTimerSec  int     `json:"settlement_timer_seconds"`
-	CloseTime           string  `json:"close_time"`
-	OpenTime            string  `json:"open_time"`
-	Category            string  `json:"category"`
+	Ticker             string  `json:"ticker"`
+	EventTicker        string  `json:"event_ticker"`
+	MarketType         string  `json:"market_type"`
+	Title              string  `json:"title"`
+	Subtitle           string  `json:"subtitle"`
+	YesSubTitle        string  `json:"yes_sub_title"`
+	NoSubTitle         string  `json:"no_sub_title"`
+	Status             string  `json:"status"`
+	YesBid             int     `json:"yes_bid"`
+	YesAsk             int     `json:"yes_ask"`
+	NoBid              int     `json:"no_bid"`
+	NoAsk              int     `json:"no_ask"`
+	LastPrice          int     `json:"last_price"`
+	PreviousYesBid     int     `json:"previous_yes_bid"`
+	PreviousYesAsk     int     `json:"previous_yes_ask"`
+	PreviousPrice      int     `json:"previous_price"`
+	Volume             int     `json:"volume"`
+	Volume24H          int     `json:"volume_24h"`
+	Liquidity          int     `json:"liquidity"`
+	OpenInterest       int     `json:"open_interest"`
+	Result             string  `json:"result"`
+	CapStrike          float64 `json:"cap_strike"`
+	FloorStrike        float64 `json:"floor_strike"`
+	ExpectedExpiryTime string  `json:"expected_expiration_time"`
+	ExpirationTime     string  `json:"expiration_time"`
+	LatestExpiryTime   string  `json:"latest_expiration_time"`
+	SettlementTimerSec int     `json:"settlement_timer_seconds"`
+	CloseTime          string  `json:"close_time"`
+	OpenTime           string  `json:"open_time"`
+	Category           string  `json:"category"`
 }
 
 // Event represents a Kalshi event (contains multiple markets).
 type Event struct {
-	EventTicker     string `json:"event_ticker"`
-	SeriesTicker    string `json:"series_ticker"`
-	Title           string `json:"title"`
-	Mutually        bool   `json:"mutually_exclusive"`
-	Category        string `json:"category"`
-	SubTitle        string `json:"sub_title"`
-	StrikeDate      string `json:"strike_date"`
-	StrikePeriod    string `json:"strike_period"`
+	EventTicker  string `json:"event_ticker"`
+	SeriesTicker string `json:"series_ticker"`
+	Title        string `json:"title"`
+	Mutually     bool   `json:"mutually_exclusive"`
+	Category     string `json:"category"`
+	SubTitle     string `json:"sub_title"`
+	StrikeDate   string `json:"strike_date"`
+	StrikePeriod string `json:"strike_period"`
 }
 
 // GetMarketsResponse represents a response from getting markets.
@@ -65,16 +65,16 @@ type GetEventResponse struct {
 
 // Position represents a position in a market.
 type Position struct {
-	Ticker                   string `json:"ticker"`
-	EventTicker              string `json:"event_ticker"`
-	EventTitle               string `json:"event_title"`
-	MarketTitle              string `json:"market_title"`
-	YesPosition              int    `json:"yes_position"`
-	NoPosition               int    `json:"no_position"`
-	TotalCost                int    `json:"total_cost"`
-	RealizedPnl              int    `json:"realized_pnl"`
-	RestingOrdersCount       int    `json:"resting_orders_count"`
-	Fees                     int    `json:"fees"`
+	Ticker             string `json:"ticker"`
+	EventTicker        string `json:"event_ticker"`
+	EventTitle         string `json:"event_title"`
+	MarketTitle        string `json:"market_title"`
+	YesPosition        int    `json:"yes_position"`
+	NoPosition         int    `json:"no_position"`
+	TotalCost          int    `json:"total_cost"`
+	RealizedPnl        int    `json:"realized_pnl"`
+	RestingOrdersCount int    `json:"resting_orders_count"`
+	Fees               int    `json:"fees"`
 }
 
 // GetPositionsResponse represents a response from getting positions.
@@ -85,9 +85,9 @@ type GetPositionsResponse struct {
 
 // Balance represents account balance.
 type Balance struct {
-	Balance           int `json:"balance"`            // Available balance in cents
-	PortfolioValue    int `json:"portfolio_value"`    // Value of all positions in cents
-	PayoutAvailable   int `json:"payout_available"`
+	Balance         int `json:"balance"`         // Available balance in cents
+	PortfolioValue  int `json:"portfolio_value"` // Value of all positions in cents
+	PayoutAvailable int `json:"payout_available"`
 }
 
 // GetMarket retrieves a single market by ticker.
@@ -188,4 +188,3 @@ func (c *Client) GetBalance() (*Balance, error) {
 
 	return &resp, nil
 }
-
