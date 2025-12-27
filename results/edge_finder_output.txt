@@ -1,0 +1,78 @@
+================================================================================
+EDGE FINDER: Searching for Profitable Conditions
+Started: 2025-12-26 16:01:22
+================================================================================
+
+Fetching Dec 25... ✅
+Fetching Dec 24... ✅
+Fetching Dec 23... ✅
+Fetching Dec 22... ✅
+Fetching Dec 21... ✅
+Fetching Dec 20... ✅
+Fetching Dec 19... ✅
+Fetching Dec 18... ✅
+Fetching Dec 17... ✅
+Fetching Dec 16... ✅
+Fetching Dec 15... ✅
+Fetching Dec 14... ✅
+Fetching Dec 13... ✅
+Fetching Dec 12... ✅
+Fetching Dec 11... ✅
+Fetching Dec 10... ✅
+Fetching Dec 9... ✅
+Fetching Dec 8... ✅
+Fetching Dec 7... ✅
+Fetching Dec 6... ✅
+Fetching Dec 5... ✅
+Fetched 21 days of data
+
+=============================================================
+STRATEGY 1: When Market is UNCERTAIN
+(Gap between 1st and 2nd < 15¢)
+=============================================================
+
+Uncertain days: 7/21
+Win rate: 42.9% (3/7)
+Total profit: $-63.43
+Avg profit: $-9.06
+
+=============================================================
+STRATEGY 2: When Market is UNSURE (top < 50¢)
+Spread across top 3 brackets
+=============================================================
+
+Unsure days: 4/21
+Win rate: 0.0% (0/4)
+Total profit: $-55.22
+
+=============================================================
+STRATEGY 3: Combined Signal
+(Market favorite AND matches METAR prediction)
+=============================================================
+
+Agreement days: 10/21
+Win rate: 80.0% (8/10)
+Total profit: $23.00
+
+=============================================================
+STRATEGY 4: Detect Mispricing
+(METAR bracket is underpriced relative to market)
+=============================================================
+
+Mispriced days: 1/21
+Win rate: 0.0% (0/1)
+Total profit: $-14.00
+
+=============================================================
+STRATEGY 5: Ensemble (Vote-Based)
+(Trade when 2+ signals agree)
+=============================================================
+
+Consensus days: 11/21
+Win rate: 81.8% (9/11)
+Total profit: $27.00
+
+
+================================================================================
+ANALYSIS COMPLETE
+================================================================================

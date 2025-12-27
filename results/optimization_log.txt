@@ -1,0 +1,116 @@
+================================================================================
+LA HIGH TEMPERATURE STRATEGY OPTIMIZER
+Started: 2025-12-26 15:51:51
+================================================================================
+
+PHASE 1: Fetching historical data...
+  Fetching Dec 25... ✅ METAR=66°, Winner=66°
+  Fetching Dec 24... ✅ METAR=64°, Winner=64°
+  Fetching Dec 23... ✅ METAR=63°, Winner=64°
+  Fetching Dec 22... ✅ METAR=64°, Winner=64°
+  Fetching Dec 21... ✅ METAR=64°, Winner=64°
+  Fetching Dec 20... ✅ METAR=65°, Winner=65°
+  Fetching Dec 19... ✅ METAR=69°, Winner=71°
+  Fetching Dec 18... ✅ METAR=70°, Winner=0°
+  Fetching Dec 17... ✅ METAR=72°, Winner=74°
+  Fetching Dec 16... ✅ METAR=62°, Winner=0°
+  Fetching Dec 15... ✅ METAR=66°, Winner=65°
+  Fetching Dec 14... ✅ METAR=62°, Winner=0°
+  Fetching Dec 13... ✅ METAR=61°, Winner=0°
+  Fetching Dec 12... ✅ METAR=67°, Winner=67°
+  Fetching Dec 11... ✅ METAR=72°, Winner=71°
+  Fetching Dec 10... ✅ METAR=79°, Winner=78°
+  Fetching Dec 9... ✅ METAR=80°, Winner=80°
+  Fetching Dec 8... ✅ METAR=76°, Winner=76°
+  Fetching Dec 7... ✅ METAR=70°, Winner=69°
+  Fetching Dec 6... ✅ METAR=69°, Winner=68°
+  Fetching Dec 5... ✅ METAR=68°, Winner=68°
+Fetched 21 days of data
+
+PHASE 2: Testing calibration values...
+  Calibration -1°F: Accuracy=9.5%, Profit=$-254.00, Sharpe=-2.02
+  Calibration +0°F: Accuracy=42.9%, Profit=$-113.00, Sharpe=-0.52
+  Calibration +1°F: Accuracy=38.1%, Profit=$-97.00, Sharpe=-0.32
+  Calibration +2°F: Accuracy=9.5%, Profit=$-190.00, Sharpe=-0.59
+  Calibration +3°F: Accuracy=4.8%, Profit=$-246.00, Sharpe=-1.15
+
+PHASE 3: Testing hedge ratios...
+  Hedge 100/0: Accuracy=38.1%, Profit=$-94.82, Sharpe=-0.32
+  Hedge 80/20: Accuracy=38.1%, Profit=$-120.83, Sharpe=-0.52
+  Hedge 70/30: Accuracy=38.1%, Profit=$-136.12, Sharpe=-0.68
+  Hedge 60/40: Accuracy=38.1%, Profit=$-153.32, Sharpe=-0.90
+  Hedge 50/50: Accuracy=38.1%, Profit=$-172.87, Sharpe=-1.15
+
+PHASE 4: Testing multi-bracket strategies...
+  2-bracket spread: HitRate=47.6%, Profit=$-172.87, Sharpe=-1.15
+  3-bracket spread: HitRate=52.4%, Profit=$-190.78, Sharpe=-1.73
+  4-bracket spread: HitRate=52.4%, Profit=$-219.63, Sharpe=-2.52
+  5-bracket spread: HitRate=52.4%, Profit=$-215.48, Sharpe=-3.58
+
+PHASE 5: Testing market-following strategies...
+  Market favorite: Accuracy=0.0%, Profit=$-294.00, Sharpe=0.00
+
+PHASE 6: Testing adaptive strategies...
+  Adaptive calibration: Accuracy=28.6%, Profit=$-112.00, Sharpe=-0.33
+  Conservative 2-bracket: Accuracy=42.9%, Profit=$-169.56, Sharpe=-0.98
+  Value betting (<30¢): Accuracy=100.0%, Profit=$42.00, Sharpe=0.00
+
+
+================================================================================
+FINAL STRATEGY RANKINGS (by Sharpe Ratio)
+================================================================================
+
+Strategy                   WinRate   Sharpe     Profit      MaxDD
+--------------------------------------------------------------------------------
+Market_Favorite               0.0%     0.00 $ -294.00 $  294.00 🏆 BEST
+Value_Betting               100.0%     0.00 $   42.00 $    0.00 🥈
+Hedge_100_0                  38.1%    -0.32 $  -94.82 $  174.19 🥉
+Calibration_+1               38.1%    -0.32 $  -97.00 $  175.00
+Adaptive_Calibration         28.6%    -0.33 $ -112.00 $  176.00
+Calibration_+0               42.9%    -0.52 $ -113.00 $  145.00
+Hedge_80_20                  38.1%    -0.52 $ -120.83 $  167.13
+Calibration_+2                9.5%    -0.59 $ -190.00 $  204.00
+Hedge_70_30                  38.1%    -0.68 $ -136.12 $  166.26
+Hedge_60_40                  38.1%    -0.90 $ -153.32 $  168.38
+Conservative_2bracket        42.9%    -0.98 $ -169.56 $  173.73
+Hedge_50_50                  38.1%    -1.15 $ -172.87 $  177.09
+Spread_2_brackets            47.6%    -1.15 $ -172.87 $  177.09
+Calibration_+3                4.8%    -1.15 $ -246.00 $  246.00
+Spread_3_brackets            52.4%    -1.73 $ -190.78 $  190.78
+Calibration_-1                9.5%    -2.02 $ -254.00 $  254.00
+Spread_4_brackets            52.4%    -2.52 $ -219.63 $  219.63
+Spread_5_brackets            52.4%    -3.58 $ -215.48 $  215.48
+
+================================================================================
+TOP 3 STRATEGIES - DETAILED
+================================================================================
+
+#1: Market_Favorite
+    Description: Bet on bracket with lowest first price
+    Win Rate: 0.0% (21 days)
+    Total Profit: $-294.00
+    Avg Profit/Day: $-14.00
+    Max Drawdown: $294.00
+    Sharpe Ratio: 0.00
+
+#2: Value_Betting
+    Description: Only trade when first price < 30¢
+    Win Rate: 100.0% (1 days)
+    Total Profit: $42.00
+    Avg Profit/Day: $42.00
+    Max Drawdown: $0.00
+    Sharpe Ratio: 0.00
+
+#3: Hedge_100_0
+    Description: 100% thesis, 0% protection (-2°F)
+    Win Rate: 38.1% (21 days)
+    Total Profit: $-94.82
+    Avg Profit/Day: $-4.52
+    Max Drawdown: $174.19
+    Sharpe Ratio: -0.32
+
+================================================================================
+OPTIMIZATION COMPLETE
+Finished: 2025-12-26 15:52:48
+Results saved to: optimization_results.txt
+================================================================================

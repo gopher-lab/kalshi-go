@@ -1,0 +1,104 @@
+================================================================================
+FINAL STRATEGY VALIDATION
+Testing the Ensemble strategy in detail
+Started: 2025-12-26 16:03:41
+================================================================================
+
+Fetching Dec 25... ✅
+Fetching Dec 24... ✅
+Fetching Dec 23... ✅
+Fetching Dec 22... ✅
+Fetching Dec 21... ✅
+Fetching Dec 20... ✅
+Fetching Dec 19... ✅
+Fetching Dec 18... ✅
+Fetching Dec 17... ✅
+Fetching Dec 16... ✅
+Fetching Dec 15... ✅
+Fetching Dec 14... ✅
+Fetching Dec 13... ✅
+Fetching Dec 12... ✅
+Fetching Dec 11... ✅
+Fetching Dec 10... ✅
+Fetching Dec 9... ✅
+Fetching Dec 8... ✅
+Fetching Dec 7... ✅
+Fetching Dec 6... ✅
+Fetching Dec 5... ✅
+Fetched 21 days of data
+
+=======================================================================
+DAY-BY-DAY BREAKDOWN
+=======================================================================
+
+Date         Result    Price   Cont     Profit Reason
+--------------------------------------------------------------------------------
+Dec 25       ✅ WIN       77¢     18 $    4.00 TRADE: METAR+2nd agree on 66° (running: $4.00)
+Dec 24       ✅ WIN       80¢     17 $    3.00 TRADE: market+METAR agree on 64° (running: $7.00)
+Dec 23       ❌ LOSS      68¢     20 $  -14.00 TRADE: market+METAR agree on 62° (running: $-7.00)
+Dec 22       ✅ WIN       71¢     19 $    5.00 TRADE: market+METAR agree on 64° (running: $-2.00)
+Dec 21       ✅ WIN       57¢     24 $   10.00 TRADE: market+METAR agree on 64° (running: $8.00)
+Dec 20       -             -      -          - SKIP: no consensus (market=65, METAR=64, 2nd=63)
+Dec 19       -             -      -          - SKIP: no consensus (market=69, METAR=68, 2nd=71)
+Dec 18       -             -      -          - SKIP: no consensus (market=78, METAR=70, 2nd=72)
+Dec 17       ❌ LOSS      44¢     31 $  -14.00 TRADE: METAR+2nd agree on 72° (running: $-6.00)
+Dec 16       -             -      -          - SKIP: no consensus (market=71, METAR=62, 2nd=73)
+Dec 15       -             -      -          - SKIP: no consensus (market=65, METAR=66, 2nd=67)
+Dec 14       -             -      -          - SKIP: no consensus (market=72, METAR=62, 2nd=65)
+Dec 13       -             -      -          - SKIP: no consensus (market=65, METAR=60, 2nd=67)
+Dec 12       -             -      -          - SKIP: no consensus (market=67, METAR=66, 2nd=69)
+Dec 11       -             -      -          - SKIP: no consensus (market=71, METAR=72, 2nd=73)
+Dec 10       ✅ WIN       84¢     16 $    2.00 TRADE: market+METAR agree on 78° (running: $-4.00)
+Dec 9        ✅ WIN       93¢     15 $    1.00 TRADE: market+METAR agree on 80° (running: $-3.00)
+Dec 8        ✅ WIN       68¢     20 $    6.00 TRADE: market+METAR agree on 76° (running: $3.00)
+Dec 7        -             -      -          - SKIP: no consensus (market=71, METAR=70, 2nd=69)
+Dec 6        ✅ WIN       57¢     24 $   10.00 TRADE: market+METAR agree on 68° (running: $13.00)
+Dec 5        ✅ WIN       50¢     28 $   14.00 TRADE: market+METAR agree on 68° (running: $27.00)
+
+Total trades: 11
+Wins: 9 (81.8%)
+Total profit: $27.00
+
+=======================================================================
+RISK METRICS
+=======================================================================
+
+Mean profit/trade: $2.45
+Std deviation: $8.60
+Sharpe ratio (annualized): 4.52
+Max drawdown: $14.00
+Avg winning trade: $6.11
+Avg losing trade: $-14.00
+Win/Loss ratio: 0.44
+
+Kelly fraction: 40.17%
+✅ POSITIVE KELLY - Strategy has edge!
+   Suggested bet size: 40.2% of bankroll
+
+=======================================================================
+FINAL RECOMMENDATIONS
+=======================================================================
+
+ENSEMBLE STRATEGY SUMMARY:
+  • Trade when 2+ signals agree (market, METAR, 2nd best)
+  • Win rate: 81.8%
+  • Avg profit: $2.45/trade
+  • Total profit (21 days): $27.00
+
+✅ STRATEGY VALIDATED!
+
+IMPLEMENTATION:
+  1. Check if market favorite matches METAR prediction
+  2. Check if 2nd best bracket agrees with either
+  3. If 2+ agree → BUY that bracket
+  4. If no consensus → SKIP the day
+
+POSITION SIZING:
+  • Conservative: $14/day fixed
+  • Moderate: 2-5% of bankroll
+  • Aggressive: Kelly fraction of bankroll
+
+
+================================================================================
+VALIDATION COMPLETE
+================================================================================

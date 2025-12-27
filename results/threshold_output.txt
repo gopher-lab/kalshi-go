@@ -1,0 +1,105 @@
+================================================================================
+THRESHOLD STRATEGY OPTIMIZATION
+Finding the optimal threshold and position sizing
+Started: 2025-12-26 15:59:07
+================================================================================
+
+Fetching Dec 25... ✅
+Fetching Dec 24... ✅
+Fetching Dec 23... ✅
+Fetching Dec 22... ✅
+Fetching Dec 21... ✅
+Fetching Dec 20... ✅
+Fetching Dec 19... ✅
+Fetching Dec 18... ✅
+Fetching Dec 17... ✅
+Fetching Dec 16... ✅
+Fetching Dec 15... ✅
+Fetching Dec 14... ✅
+Fetching Dec 13... ✅
+Fetching Dec 12... ✅
+Fetching Dec 11... ✅
+Fetching Dec 10... ✅
+Fetching Dec 9... ✅
+Fetching Dec 8... ✅
+Fetching Dec 7... ✅
+Fetching Dec 6... ✅
+Fetching Dec 5... ✅
+Fetched 21 days of data
+
+=============================================================
+FINE-GRAINED THRESHOLD ANALYSIS (5¢ increments)
+=============================================================
+
+Threshold      Trades     Wins    WinRate     Profit  Avg/Trade
+----------------------------------------------------------------------
+>= 30¢             18       12      66.7% $  -11.00 $   -0.61 ⭐
+>= 35¢             18       12      66.7% $  -11.00 $   -0.61
+>= 40¢             17       12      70.6% $    3.00 $    0.18 ⭐
+>= 45¢             17       12      70.6% $    3.00 $    0.18
+>= 50¢             17       12      70.6% $    3.00 $    0.18
+>= 55¢             15       11      73.3% $    3.00 $    0.20
+>= 60¢             13        9      69.2% $  -17.00 $   -1.31
+>= 65¢             12        8      66.7% $  -24.00 $   -2.00
+>= 70¢              9        6      66.7% $  -22.00 $   -2.44
+>= 75¢              7        4      57.1% $  -32.00 $   -4.57
+>= 80¢              5        3      60.0% $  -22.00 $   -4.40
+>= 85¢              3        1      33.3% $  -27.00 $   -9.00
+
+BEST THRESHOLD: >=40¢ with profit $3.00
+
+=============================================================
+POSITION SIZING ANALYSIS (at optimal threshold)
+=============================================================
+
+Win rate at threshold: 70.6%
+Average first price: 71¢
+Payout ratio (b): 0.41
+Kelly fraction: -1.42% of bankroll
+
+KELLY SUGGESTS: No edge (negative Kelly)
+  Either don't trade or model is wrong
+
+=============================================================
+DAY-BY-DAY BREAKDOWN (Best Strategy)
+=============================================================
+
+Date          Top Price     Won?  Contracts     Profit
+------------------------------------------------------------
+Dec 25              85¢        ❌         16 $  -14.00 (running: $-14.00)
+Dec 24              80¢        ✅         17 $    3.00 (running: $-11.00)
+Dec 23              68¢        ❌         20 $  -14.00 (running: $-25.00)
+Dec 22              71¢        ✅         19 $    5.00 (running: $-20.00)
+Dec 21              57¢        ✅         24 $   10.00 (running: $-10.00)
+Dec 20              64¢        ✅         21 $    7.00 (running: $-3.00)
+Dec 19              51¢        ❌         27 $  -14.00 (running: $-17.00)
+Dec 18              14¢        -          -          - (skipped)
+Dec 17              77¢        ❌         18 $  -14.00 (running: $-31.00)
+Dec 16              12¢        -          -          - (skipped)
+Dec 15              67¢        ✅         20 $    6.00 (running: $-25.00)
+Dec 14              39¢        -          -          - (skipped)
+Dec 13              12¢        -          -          - (skipped)
+Dec 12              76¢        ✅         18 $    4.00 (running: $-21.00)
+Dec 11              73¢        ✅         19 $    5.00 (running: $-16.00)
+Dec 10              84¢        ✅         16 $    2.00 (running: $-14.00)
+Dec 9               93¢        ✅         15 $    1.00 (running: $-13.00)
+Dec 8               68¢        ✅         20 $    6.00 (running: $-7.00)
+Dec 7               89¢        ❌         15 $  -14.00 (running: $-21.00)
+Dec 6               57¢        ✅         24 $   10.00 (running: $-11.00)
+Dec 5               50¢        ✅         28 $   14.00 (running: $3.00)
+
+=============================================================
+RISK METRICS
+=============================================================
+
+Number of trades: 17
+Mean profit/trade: $0.18
+Std deviation: $9.93
+Sharpe ratio (annualized): 0.28
+Max drawdown: $31.00
+Max win streak: 6
+Max loss streak: 2
+
+================================================================================
+OPTIMIZATION COMPLETE
+================================================================================
