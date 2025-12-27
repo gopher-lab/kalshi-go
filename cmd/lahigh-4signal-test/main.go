@@ -456,3 +456,4 @@ func getFirstTradePrice(ticker string) (int, error) {
 	return result.Trades[0].YesPrice, nil
 }
 
+

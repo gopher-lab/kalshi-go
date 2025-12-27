@@ -145,3 +145,4 @@ func FetchCurrentMETAR(station *Station) (*METARObservation, error) {
 	}, nil
 }
 
+

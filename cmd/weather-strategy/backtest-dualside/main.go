@@ -471,3 +471,4 @@ func printSummary(results []DayResult, betSizeYes, betSizeNo float64) {
 	fmt.Println()
 }
 
+

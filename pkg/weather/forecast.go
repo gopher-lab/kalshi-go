@@ -122,3 +122,4 @@ func FetchForecastForDate(station *Station, targetDate time.Time) (*Forecast, er
 	return nil, fmt.Errorf("no forecast found for %s", targetDate.Format("2006-01-02"))
 }
 
+

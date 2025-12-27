@@ -86,3 +86,4 @@ All trades are logged to stdout. Consider redirecting to file:
 go run ./cmd/multi-city-bot/ --bet=100 2>&1 | tee trading.log
 ```
 
+
