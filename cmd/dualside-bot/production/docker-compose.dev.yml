@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  trading-bot-dev:
+    build:
+      context: ../../..
+      dockerfile: cmd/dualside-bot/production/Dockerfile
+    container_name: dualside-bot-paper
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./data:/data
+    environment:
+      - KALSHI_API_KEY=${KALSHI_API_KEY}
+      - KALSHI_PRIVATE_KEY=${KALSHI_PRIVATE_KEY}
+      - BET_YES=500
+      - BET_NO=150
+      - MIN_YES_PRICE=50
+      - MAX_YES_PRICE=95
+      - MIN_NO_PRICE=40
+      - MAX_NO_PRICE=95
+      - MAX_NO_TRADES=4
+      - TRADING_START_HOUR=7
+      - TRADING_END_HOUR=14
+      - POLL_INTERVAL=60
+      - HTTP_PORT=8080
+      - DATA_DIR=/data
+    command: ["--dry-run"]
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

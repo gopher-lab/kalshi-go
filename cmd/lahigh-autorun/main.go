@@ -28,8 +28,8 @@ var (
 	maxEntryPrice    = 80   // Don't buy above 80¢
 	cliCalibration   = 1.0  // METAR to CLI adjustment
 	pollInterval     = 30 * time.Second
-	tradingStartHour = 7    // 7 AM PT - start trading
-	tradingEndHour   = 12   // 12 PM PT - stop adding positions
+	tradingStartHour = 7  // 7 AM PT - start trading
+	tradingEndHour   = 12 // 12 PM PT - stop adding positions
 )
 
 type MarketState struct {
@@ -159,7 +159,7 @@ func checkAndTrade(client *rest.Client, eventTicker string, targetDate time.Time
 
 	if !isTargetToday {
 		// Target is in the future - monitor only
-		targetStart := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(), 
+		targetStart := time.Date(targetDate.Year(), targetDate.Month(), targetDate.Day(),
 			tradingStartHour, 0, 0, 0, la)
 		until := targetStart.Sub(now).Round(time.Minute)
 		tradingStatus = fmt.Sprintf("⏳ WAITING - Trading starts in %v", until)
@@ -260,7 +260,7 @@ func checkAndTrade(client *rest.Client, eventTicker string, targetDate time.Time
 	}
 
 	if bestOpp != nil {
-		fmt.Printf("         Best opportunity: %s @ %d¢ (Edge: +%.0f%%)\n", 
+		fmt.Printf("         Best opportunity: %s @ %d¢ (Edge: +%.0f%%)\n",
 			bestOpp.Strike, bestOpp.YesAsk, bestOpp.Edge*100)
 	}
 
@@ -445,4 +445,3 @@ func parseTargetDate(ticker string) time.Time {
 
 	return time.Date(year, months[monthStr], day, 0, 0, 0, 0, time.UTC)
 }
-

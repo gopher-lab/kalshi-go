@@ -487,3 +487,4 @@ func getMETARMax(date time.Time) (int, error) {
 	return int(math.Round(maxTemp)), nil
 }
 
+
