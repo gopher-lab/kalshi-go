@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  trading-bot:
+    build:
+      context: ../../..
+      dockerfile: cmd/dualside-bot/production/Dockerfile
+    container_name: dualside-trading-bot
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - bot-data:/data
+    environment:
+      # Required: Kalshi API credentials
+      - KALSHI_API_KEY=${KALSHI_API_KEY}
+      - KALSHI_PRIVATE_KEY=${KALSHI_PRIVATE_KEY}
+      
+      # Trading Parameters (optimized defaults)
+      - BET_YES=${BET_YES:-500}
+      - BET_NO=${BET_NO:-150}
+      - MIN_YES_PRICE=${MIN_YES_PRICE:-50}
+      - MAX_YES_PRICE=${MAX_YES_PRICE:-95}
+      - MIN_NO_PRICE=${MIN_NO_PRICE:-40}
+      - MAX_NO_PRICE=${MAX_NO_PRICE:-95}
+      - MAX_NO_TRADES=${MAX_NO_TRADES:-4}
+      
+      # Trading Window (local time per city)
+      - TRADING_START_HOUR=${TRADING_START_HOUR:-7}
+      - TRADING_END_HOUR=${TRADING_END_HOUR:-14}
+      
+      # Polling interval in seconds
+      - POLL_INTERVAL=${POLL_INTERVAL:-60}
+      
+      # Notifications (optional)
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL:-}
+      
+      # Server
+      - HTTP_PORT=8080
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      
+      # Persistence
+      - DATA_DIR=/data
+    
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  bot-data:
+    driver: local
+

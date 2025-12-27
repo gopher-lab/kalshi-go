@@ -13,11 +13,11 @@ import (
 )
 
 type Market struct {
-	Ticker      string  `json:"ticker"`
-	FloorStrike int     `json:"floor_strike"`
-	CapStrike   int     `json:"cap_strike"`
-	Result      string  `json:"result"`
-	Status      string  `json:"status"`
+	Ticker      string `json:"ticker"`
+	FloorStrike int    `json:"floor_strike"`
+	CapStrike   int    `json:"cap_strike"`
+	Result      string `json:"result"`
+	Status      string `json:"status"`
 }
 
 type MarketsResponse struct {
@@ -63,26 +63,26 @@ type DayData struct {
 }
 
 type Parameters struct {
-	BetYes       float64
-	BetNo        float64
-	MinYesPrice  int
-	MaxYesPrice  int
-	MinNoPrice   int
-	MaxNoPrice   int
-	MaxNoTrades  int
+	BetYes      float64
+	BetNo       float64
+	MinYesPrice int
+	MaxYesPrice int
+	MinNoPrice  int
+	MaxNoPrice  int
+	MaxNoTrades int
 }
 
 type Result struct {
-	Params       Parameters
-	Trades       int
-	Wins         int
-	WinRate      float64
-	TotalProfit  float64
-	AvgProfit    float64
-	Sharpe       float64
-	MaxDrawdown  float64
-	YesProfit    float64
-	NoProfit     float64
+	Params      Parameters
+	Trades      int
+	Wins        int
+	WinRate     float64
+	TotalProfit float64
+	AvgProfit   float64
+	Sharpe      float64
+	MaxDrawdown float64
+	YesProfit   float64
+	NoProfit    float64
 }
 
 var httpClient = &http.Client{Timeout: 15 * time.Second}
@@ -114,7 +114,7 @@ func main() {
 
 	var results []Result
 	totalTests := len(betYesSizes) * len(betNoSizes) * len(minYesPrices) * len(maxYesPrices) * len(minNoPrices) * len(maxNoPrices) * len(maxNoTradesCounts)
-	
+
 	fmt.Printf("🔬 Testing %d parameter combinations...\n\n", totalTests)
 
 	tested := 0
@@ -237,7 +237,7 @@ func main() {
 		fmt.Printf("     Sharpe:    %.2f\n", best.Sharpe)
 		fmt.Printf("     YES P/L:   $%.2f\n", best.YesProfit)
 		fmt.Printf("     NO P/L:    $%.2f\n", best.NoProfit)
-		
+
 		// Annual projection
 		annual := best.TotalProfit / 21.0 * 365.0
 		fmt.Println()
@@ -532,4 +532,3 @@ func getMETARMax(station Station, date time.Time) (int, error) {
 func formatBracket(m *Market) string {
 	return fmt.Sprintf("%d-%d°", m.FloorStrike, m.CapStrike)
 }
-
