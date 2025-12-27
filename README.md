@@ -65,14 +65,14 @@ If no consensus → SKIP the day (48% of days)
 ### Quick Start
 
 ```bash
-# Run the validated ensemble strategy
-go run ./cmd/lahigh-final-strategy/
+# Get today's trading recommendation
+go run ./cmd/3signal/recommend/
 
-# Run the strategy optimizer (tests 20+ strategies)
-go run ./cmd/lahigh-optimizer/
+# Run the validated ensemble strategy backtest
+go run ./cmd/3signal/strategy/
 
-# Find edge opportunities
-go run ./cmd/lahigh-edge-finder/
+# Run Monte Carlo simulation (10,000 runs)
+go run ./cmd/3signal/montecarlo/
 
 # Monitor today's temperature
 go run ./cmd/lahigh-monitor/
@@ -83,27 +83,24 @@ go run ./cmd/lahigh-monitor/
 ```
 kalshi-go/
 ├── cmd/
+│   ├── 3signal/                 # 🏆 PRODUCTION STRATEGY
+│   │   ├── recommend/           # Get daily trade recommendation
+│   │   ├── strategy/            # Run backtest
+│   │   ├── montecarlo/          # Monte Carlo simulation
+│   │   └── edge-finder/         # Edge discovery
 │   ├── kalshi-bot/              # Generic WebSocket bot
-│   ├── lahigh-final-strategy/   # 🏆 Validated ensemble strategy
 │   ├── lahigh-optimizer/        # Strategy optimizer (20+ strategies)
-│   ├── lahigh-edge-finder/      # Edge discovery tool
-│   ├── lahigh-market-follow/    # Market-following analysis
-│   ├── lahigh-threshold-optimize/ # Threshold optimization
-│   ├── lahigh-deep-analysis/    # Pattern analysis
+│   ├── lahigh-4signal-test/     # 4-5 signal experiments
 │   ├── lahigh-autorun/          # Automated trading bot
 │   ├── lahigh-trader/           # Manual trading bot
-│   ├── lahigh-backtest-rigorous/# Rigorous prediction backtest
-│   ├── lahigh-backtest-real/    # Real Kalshi trade data backtest
-│   └── lahigh-status/           # Check bot readiness
+│   ├── lahigh-monitor/          # Real-time temperature monitor
+│   └── lahigh-*/                # Other analysis tools
 ├── pkg/
 │   ├── ws/                      # WebSocket client
 │   └── rest/                    # REST API client
-├── internal/
-│   └── config/                  # Configuration handling
 ├── docs/
 │   └── LAHIGH-STRATEGY.md       # Full strategy documentation
-├── Dockerfile                   # Docker build
-├── docker-compose.yml           # Docker compose config
+├── results/                     # Backtest output files
 └── go.mod
 ```
 
